@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
-    
-    // NO 'NEXT_PUBLIC' prefix here. Just the raw secret key.
-    const API_KEY = process.env.POLLINATIONS_KEY; 
+    const API_KEY = process.env.POLLINATIONS_KEY; // Secret server-side variable
 
     const res = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
       method: 'POST',
@@ -14,15 +12,18 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'nova-fast', // Hardcoded as requested
+        model: 'nova-fast',
         messages: [{ role: 'user', content: prompt }],
         seed: Math.floor(Math.random() * 1000)
       })
     });
 
+    if (!res.ok) throw new Error("Pollinations API rejected the request");
+
     const data = await res.json();
     return NextResponse.json({ content: data.choices[0].message.content });
   } catch (e) {
-    return NextResponse.json({ error: "Uplink Error" }, { status: 500 });
+    console.error("Route Error:", e);
+    return NextResponse.json({ error: "Uplink failed" }, { status: 500 });
   }
 }
