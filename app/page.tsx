@@ -8,9 +8,7 @@ import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
-// Use your Vercel Environment Variable
-const INTERNAL_AI_KEY = process.env.NEXT_PUBLIC_POLLINATIONS_KEY;
-
+// TYPES
 interface InputGroupProps {
   label: string;
   val: string;
@@ -41,37 +39,29 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
+  // FIXED: Now calls your internal API route to keep the key hidden and avoid "Busy" errors
   const callAI = async (prompt: string) => {
-    const model = 'nova-fast'; // Hardcoded as requested
+    updateLog('Establishing secure uplink to Nova-Fast...');
     
-    // Attempt Authenticated Call using your Vercel Key
     try {
-      const res = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
+      const res = await fetch('/api/generate', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${INTERNAL_AI_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [{ role: 'user', content: prompt }],
-          seed: Math.floor(Math.random() * 1000)
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
       });
 
       if (res.ok) {
         const data = await res.json();
-        return data.choices[0].message.content;
+        return data.content;
       }
+      throw new Error("Internal route failed");
     } catch (e) {
-      console.error("Auth AI call failed, falling back to public...");
+      updateLog('Uplink Busy: Rerouting through public proxy...');
+      // Fallback to public if your route fails for some reason
+      const publicRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=nova-fast`);
+      if (publicRes.ok) return await publicRes.text();
+      throw e;
     }
-
-    // Secondary Fallback to Public Endpoint
-    const publicRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
-    if (publicRes.ok) return await publicRes.text();
-    
-    throw new Error("AI Generation Limited");
   };
 
   const handleGenerate = async () => {
@@ -101,7 +91,7 @@ export default function BotFactory() {
       const tempRes = await callAI(`Analyze this: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
       temperature = tempRes.match(/0\.\d+/)?.[0] || "0.7";
     } catch (err) {
-      updateLog('Uplink Busy: Using raw input data.');
+      updateLog('Uplink Error: Using raw input data.');
     }
 
     try {
@@ -280,6 +270,7 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
   );
 }
 
+// Subcomponents
 const InputGroup = ({ label, val, set, ph }: InputGroupProps) => (
   <div>
     <label className="label-premium">{label}</label>
