@@ -8,6 +8,9 @@ import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
+// Use your Vercel Environment Variable
+const INTERNAL_AI_KEY = process.env.NEXT_PUBLIC_POLLINATIONS_KEY;
+
 interface InputGroupProps {
   label: string;
   val: string;
@@ -19,7 +22,6 @@ export default function BotFactory() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [logs, setLogs] = useState<string[]>(['> System ready.']);
-  const [pollinationsKey, setPollinationsKey] = useState(''); // Optional key for enhancement
 
   const [formData, setFormData] = useState({
     botName: '',
@@ -39,37 +41,37 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
-  const callAI = async (prompt: string, model = 'nova-fast') => {
-    // 1. Try Public Endpoint
+  const callAI = async (prompt: string) => {
+    const model = 'nova-fast'; // Hardcoded as requested
+    
+    // Attempt Authenticated Call using your Vercel Key
     try {
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&seed=${Math.floor(Math.random() * 999)}`);
-      if (res.ok) return await res.text();
-    } catch (e) {
-      console.warn("Public endpoint failed, trying authenticated fallback...");
-    }
+      const res = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${INTERNAL_AI_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: 'user', content: prompt }],
+          seed: Math.floor(Math.random() * 1000)
+        })
+      });
 
-    // 2. Authenticated Fallback (If user provides key in UI or we have one)
-    if (pollinationsKey) {
-      try {
-        const res = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${pollinationsKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: prompt }]
-          })
-        });
+      if (res.ok) {
         const data = await res.json();
         return data.choices[0].message.content;
-      } catch (e) {
-        updateLog('Error: Authenticated fallback failed.');
       }
+    } catch (e) {
+      console.error("Auth AI call failed, falling back to public...");
     }
 
-    throw new Error("AI enhancement failed.");
+    // Secondary Fallback to Public Endpoint
+    const publicRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
+    if (publicRes.ok) return await publicRes.text();
+    
+    throw new Error("AI Generation Limited");
   };
 
   const handleGenerate = async () => {
@@ -80,33 +82,33 @@ export default function BotFactory() {
 
     setLoading(true);
     setGenerated(false);
-    updateLog(`Initializing build sequence for ${formData.botName}...`);
+    updateLog(`Connecting to Nova-Fast via Internal Uplink...`);
 
     let finalSysPrompt = formData.personaRaw;
     let finalBackstory = formData.backstoryRaw;
     let temperature = "0.7";
 
     try {
-      updateLog('Enhancing persona matrix...');
-      const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot based on this persona. No markdown. Persona: ${formData.personaRaw}`);
+      updateLog('Generating high-density system prompt...');
+      const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`);
       finalSysPrompt = aiPrompt.substring(0, 800).replace(/\n/g, ' ');
 
       updateLog('Fabricating backstory...');
-      const aiStory = await callAI(`Write a 2-sentence mysterious backstory for this character: ${formData.backstoryRaw || formData.personaRaw}`);
+      const aiStory = await callAI(`Write a 2-sentence mysterious backstory for: ${formData.backstoryRaw || formData.personaRaw}`);
       finalBackstory = aiStory.replace(/\n/g, ' ');
 
-      updateLog('Calculating creativity index...');
+      updateLog('Analyzing creativity index...');
       const tempRes = await callAI(`Analyze this: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
       temperature = tempRes.match(/0\.\d+/)?.[0] || "0.7";
     } catch (err) {
-      updateLog('Warning: AI limit reached. Using raw text input.');
+      updateLog('Uplink Busy: Using raw input data.');
     }
 
     try {
       const envContent = `
 # ═══ USER PROVIDED CREDENTIALS ═══
 BOT_TOKEN=
-POLLINATIONS_KEY=${pollinationsKey}
+POLLINATIONS_KEY=
 OWNER_ID=
 SERVER_ID=
 
@@ -138,14 +140,13 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
       zip.file("env.txt", envContent.trim());
       zip.file(".gitignore", "node_modules\n.env");
 
-      updateLog('Compressing binary assets...');
       const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, `${formData.botName.replace(/\s/g, '_')}_CORE.zip`);
 
-      updateLog('Download initiated.');
+      updateLog('Build Complete. Core Downloaded.');
       setGenerated(true);
     } catch (err) {
-      updateLog('Critical Error: Zip generation failed.');
+      updateLog('Critical Error: Compression failed.');
     } finally {
       setLoading(false);
     }
@@ -162,7 +163,7 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
           </div>
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">BotForge</h1>
-            <p className="text-gray-500 text-sm font-mono">Universal Discord Entity Generator</p>
+            <p className="text-gray-500 text-sm font-mono">Powered by Nova-Fast</p>
           </div>
         </header>
 
@@ -183,15 +184,10 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
                  value={formData.personaRaw} onChange={e => setFormData({...formData, personaRaw: e.target.value})} />
             </div>
           </div>
-          <div className="mb-4">
+          <div>
             <label className="label-premium">Backstory Context</label>
             <textarea className="input-premium h-24 resize-none" placeholder="Origin story, hidden motives..."
                value={formData.backstoryRaw} onChange={e => setFormData({...formData, backstoryRaw: e.target.value})} />
-          </div>
-          <div>
-            <label className="label-premium text-purple-400">Optional: Pollinations Key (To avoid AI limits during build)</label>
-            <input type="password" title="This key is only used locally in your browser to enhance the bot's prompt." className="input-premium border-purple-500/30" placeholder="Paste key here..." 
-                value={pollinationsKey} onChange={e => setPollinationsKey(e.target.value)} />
           </div>
         </section>
 
@@ -224,18 +220,11 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
             </div>
           </div>
           <div className="space-y-3">
-             <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-2">
-                <span className="text-xs font-bold text-gray-500 uppercase">Capabilities</span>
-                <button onClick={() => {
-                  const newVal = !formData.enableImage;
-                  setFormData(p => ({...p, enableImage: newVal, enableVision: newVal, enableTTS: newVal, casualMode: newVal}));
-                }} className="text-xs text-accent hover:text-white transition-colors">Toggle All</button>
-             </div>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Toggle label="Image Generation (Flux)" active={formData.enableImage} onClick={() => setFormData({...formData, enableImage: !formData.enableImage})} />
+                <Toggle label="Image Generation" active={formData.enableImage} onClick={() => setFormData({...formData, enableImage: !formData.enableImage})} />
                 <Toggle label="Vision (Gemini)" active={formData.enableVision} onClick={() => setFormData({...formData, enableVision: !formData.enableVision})} />
                 <Toggle label="Voice (TTS)" active={formData.enableTTS} onClick={() => setFormData({...formData, enableTTS: !formData.enableTTS})} />
-                <Toggle label="Casual Mode (Lowercase)" active={formData.casualMode} onClick={() => setFormData({...formData, casualMode: !formData.casualMode})} />
+                <Toggle label="Casual (Lowercase)" active={formData.casualMode} onClick={() => setFormData({...formData, casualMode: !formData.casualMode})} />
              </div>
           </div>
         </section>
@@ -246,7 +235,7 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
           className="w-full py-5 rounded-xl bg-gradient-to-r from-accent to-purple-600 hover:to-purple-500 text-white font-bold text-lg shadow-xl shadow-purple-900/30 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
         >
           {loading ? <Cpu className="animate-spin" /> : <Download />}
-          {loading ? 'COMPILING NEURAL NET...' : 'GENERATE BOT CORE (.ZIP)'}
+          {loading ? 'UPLINKING TO NOVA-FAST...' : 'GENERATE BOT CORE (.ZIP)'}
         </button>
       </div>
 
@@ -268,12 +257,11 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <div className="bg-gradient-to-br from-gray-900 to-black border border-emerald-500/30 p-6 rounded-2xl relative overflow-hidden group">
                 <h3 className="text-emerald-400 font-bold mb-4 flex items-center gap-2"><Check size={18} /> Step 1: The Keys</h3>
-                <p className="text-gray-400 text-sm mb-4">Add your keys to <code className="bg-white/10 px-1 rounded text-white">env.txt</code>.</p>
                 <div className="space-y-2 text-sm">
                   <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Portal -> Bot -> Reset Token" />
-                  <KeyLink label="Server ID" url="#" desc="Right click server -> Copy ID" />
-                  <KeyLink label="Owner ID" url="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" desc="Right click YOUR Profile -> Copy ID" />
-                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="For high-speed AI generation" />
+                  <KeyLink label="Owner ID" url="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" desc="User Settings -> Advanced -> Developer Mode -> Right Click Profile -> Copy ID" />
+                  <KeyLink label="Server ID" url="#" desc="Right click server icon -> Copy ID" />
+                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="Get your own key for the bot's runtime" />
                 </div>
               </div>
               
@@ -284,14 +272,6 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
                   <p className="text-gray-400 text-xs mt-1">Rename <b>env.txt</b> to <b className="text-white">.env</b> before hosting.</p>
                 </div>
               </div>
-
-              <div className="bg-glass border border-white/5 p-6 rounded-2xl">
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Server size={18} /> Step 3: Deployment</h3>
-                <div className="space-y-4">
-                  <HostMethod title="Easy: Local PC" desc="Install Node.js. Run 'npm install' then 'npm start'." />
-                  <HostMethod title="Recommended: Railway" desc="Connect GitHub to Railway.app for 24/7 hosting." />
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -300,7 +280,6 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
   );
 }
 
-// Subcomponents (remain mostly same with minor cleanup)
 const InputGroup = ({ label, val, set, ph }: InputGroupProps) => (
   <div>
     <label className="label-premium">{label}</label>
@@ -320,20 +299,10 @@ const Toggle = ({ label, active, onClick }: any) => (
 
 const KeyLink = ({ label, url, desc }: any) => (
   <div className="flex justify-between items-start border-b border-white/5 pb-2 last:border-0">
-    <div className="max-w-[70%]">
-      <div className="text-white font-medium">{label}</div>
-      <div className="text-gray-500 text-[10px] leading-tight">{desc}</div>
-    </div>
-    <a href={url} target="_blank" className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-emerald-400 transition-colors shrink-0">Get it ↗</a>
-  </div>
-);
-
-const HostMethod = ({ title, desc }: any) => (
-  <div className="flex gap-3">
-    <div className="w-1 h-full min-h-[40px] bg-gray-700 rounded-full" />
     <div>
-      <div className="text-gray-200 text-sm font-bold">{title}</div>
-      <div className="text-gray-500 text-xs leading-relaxed">{desc}</div>
+      <div className="text-white font-medium">{label}</div>
+      <div className="text-gray-500 text-[10px]">{desc}</div>
     </div>
+    <a href={url} target="_blank" className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-emerald-400 transition-colors shrink-0">Link ↗</a>
   </div>
 );
