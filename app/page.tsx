@@ -8,7 +8,6 @@ import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
-// TYPES
 interface InputGroupProps {
   label: string;
   val: string;
@@ -39,10 +38,8 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
-  // FIXED: Now calls your internal API route to keep the key hidden and avoid "Busy" errors
+  // NEW SIMPLIFIED CALL - TRUSTS THE SERVER
   const callAI = async (prompt: string) => {
-    updateLog('Establishing secure uplink to Nova-Fast...');
-    
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
@@ -50,17 +47,17 @@ export default function BotFactory() {
         body: JSON.stringify({ prompt })
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        return data.content;
+      const data = await res.json();
+      
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Server Error");
       }
-      throw new Error("Internal route failed");
+      
+      return data.content;
     } catch (e) {
-      updateLog('Uplink Busy: Rerouting through public proxy...');
-      // Fallback to public if your route fails for some reason
-      const publicRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=nova-fast`);
-      if (publicRes.ok) return await publicRes.text();
-      throw e;
+      console.error(e);
+      // If server fails completely, return the prompt itself so the zip still builds
+      return prompt; 
     }
   };
 
@@ -72,7 +69,7 @@ export default function BotFactory() {
 
     setLoading(true);
     setGenerated(false);
-    updateLog(`Connecting to Nova-Fast via Internal Uplink...`);
+    updateLog(`Connecting to Nova-Fast via Secure Route...`);
 
     let finalSysPrompt = formData.personaRaw;
     let finalBackstory = formData.backstoryRaw;
@@ -81,17 +78,24 @@ export default function BotFactory() {
     try {
       updateLog('Generating high-density system prompt...');
       const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`);
-      finalSysPrompt = aiPrompt.substring(0, 800).replace(/\n/g, ' ');
+      // Ensure we don't get stuck with a failed prompt return
+      if (aiPrompt !== `Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`) {
+         finalSysPrompt = aiPrompt.substring(0, 800).replace(/\n/g, ' ');
+      }
 
       updateLog('Fabricating backstory...');
       const aiStory = await callAI(`Write a 2-sentence mysterious backstory for: ${formData.backstoryRaw || formData.personaRaw}`);
-      finalBackstory = aiStory.replace(/\n/g, ' ');
+      if (!aiStory.includes("mysterious backstory")) {
+          finalBackstory = aiStory.replace(/\n/g, ' ');
+      }
 
       updateLog('Analyzing creativity index...');
       const tempRes = await callAI(`Analyze this: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
-      temperature = tempRes.match(/0\.\d+/)?.[0] || "0.7";
+      const extractedTemp = tempRes.match(/0\.\d+/)?.[0];
+      if (extractedTemp) temperature = extractedTemp;
+
     } catch (err) {
-      updateLog('Uplink Error: Using raw input data.');
+      updateLog('Uplink Busy: Using raw input data.');
     }
 
     try {
