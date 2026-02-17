@@ -3,12 +3,11 @@
 import React, { useState } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { Download, Cpu, Sparkles, Check, Zap, ShieldAlert, Terminal, Server, Key } from 'lucide-react';
+import { Download, Cpu, Sparkles, Check, Zap, ShieldAlert, Terminal, Server, Key, User } from 'lucide-react';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
-// Types for the InputGroup
 interface InputGroupProps {
   label: string;
   val: string;
@@ -20,8 +19,8 @@ export default function BotFactory() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [logs, setLogs] = useState<string[]>(['> System ready.']);
+  const [pollinationsKey, setPollinationsKey] = useState(''); // Optional key for enhancement
 
-  // --- FORM STATE ---
   const [formData, setFormData] = useState({
     botName: '',
     personaRaw: '',
@@ -40,26 +39,37 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
-  const toggleAll = () => {
-    const newVal = !formData.enableImage;
-    setFormData(prev => ({
-      ...prev,
-      enableImage: newVal,
-      enableVision: newVal,
-      enableTTS: newVal,
-      casualMode: newVal
-    }));
-  };
-
   const callAI = async (prompt: string, model = 'nova-fast') => {
+    // 1. Try Public Endpoint
     try {
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&seed=${Math.floor(Math.random()*999)}`);
+      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&seed=${Math.floor(Math.random() * 999)}`);
       if (res.ok) return await res.text();
-      throw new Error("Unauth failed");
     } catch (e) {
-      updateLog('Warning: Rerouting neural pathways...');
-      return "AI generation limited. Using raw input."; 
+      console.warn("Public endpoint failed, trying authenticated fallback...");
     }
+
+    // 2. Authenticated Fallback (If user provides key in UI or we have one)
+    if (pollinationsKey) {
+      try {
+        const res = await fetch(`https://gen.pollinations.ai/v1/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${pollinationsKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const data = await res.json();
+        return data.choices[0].message.content;
+      } catch (e) {
+        updateLog('Error: Authenticated fallback failed.');
+      }
+    }
+
+    throw new Error("AI enhancement failed.");
   };
 
   const handleGenerate = async () => {
@@ -72,28 +82,38 @@ export default function BotFactory() {
     setGenerated(false);
     updateLog(`Initializing build sequence for ${formData.botName}...`);
 
+    let finalSysPrompt = formData.personaRaw;
+    let finalBackstory = formData.backstoryRaw;
+    let temperature = "0.7";
+
     try {
       updateLog('Enhancing persona matrix...');
-      const sysPrompt = await callAI(`Create a robust system prompt for a Discord bot based on this persona. Keep it raw text, no markdown. Persona: ${formData.personaRaw}`);
-      
+      const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot based on this persona. No markdown. Persona: ${formData.personaRaw}`);
+      finalSysPrompt = aiPrompt.substring(0, 800).replace(/\n/g, ' ');
+
       updateLog('Fabricating backstory...');
-      const richBackstory = await callAI(`Write a 2-sentence mysterious backstory for this character: ${formData.backstoryRaw || formData.personaRaw}`);
+      const aiStory = await callAI(`Write a 2-sentence mysterious backstory for this character: ${formData.backstoryRaw || formData.personaRaw}`);
+      finalBackstory = aiStory.replace(/\n/g, ' ');
 
       updateLog('Calculating creativity index...');
-      const tempRes = await callAI(`Analyze this persona: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9. No text.`);
-      const temperature = parseFloat(tempRes.match(/0\.\d+/)?.[0] || "0.7");
+      const tempRes = await callAI(`Analyze this: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
+      temperature = tempRes.match(/0\.\d+/)?.[0] || "0.7";
+    } catch (err) {
+      updateLog('Warning: AI limit reached. Using raw text input.');
+    }
 
+    try {
       const envContent = `
 # ═══ USER PROVIDED CREDENTIALS ═══
 BOT_TOKEN=
-POLLINATIONS_KEY=
+POLLINATIONS_KEY=${pollinationsKey}
 OWNER_ID=
 SERVER_ID=
 
 # ═══ AI GENERATED IDENTITY ═══
 BOT_NAME="${formData.botName}"
-SYSTEM_PROMPT="${sysPrompt.substring(0, 800).replace(/\n/g, ' ')}"
-BACKSTORY="${richBackstory.replace(/\n/g, ' ')}"
+SYSTEM_PROMPT="${finalSysPrompt}"
+BACKSTORY="${finalBackstory}"
 HOBBIES="${formData.hobbies}"
 DISLIKES="${formData.dislikes}"
 LIKED_USERS="${formData.likedUsers}"
@@ -124,9 +144,8 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
 
       updateLog('Download initiated.');
       setGenerated(true);
-
     } catch (err) {
-      updateLog('Critical Error: Build failed.');
+      updateLog('Critical Error: Zip generation failed.');
     } finally {
       setLoading(false);
     }
@@ -164,10 +183,15 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
                  value={formData.personaRaw} onChange={e => setFormData({...formData, personaRaw: e.target.value})} />
             </div>
           </div>
-          <div>
+          <div className="mb-4">
             <label className="label-premium">Backstory Context</label>
             <textarea className="input-premium h-24 resize-none" placeholder="Origin story, hidden motives..."
                value={formData.backstoryRaw} onChange={e => setFormData({...formData, backstoryRaw: e.target.value})} />
+          </div>
+          <div>
+            <label className="label-premium text-purple-400">Optional: Pollinations Key (To avoid AI limits during build)</label>
+            <input type="password" title="This key is only used locally in your browser to enhance the bot's prompt." className="input-premium border-purple-500/30" placeholder="Paste key here..." 
+                value={pollinationsKey} onChange={e => setPollinationsKey(e.target.value)} />
           </div>
         </section>
 
@@ -177,10 +201,10 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
             <h2 className="text-lg font-bold tracking-wide">PERSONALITY VECTORS</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputGroup label="Likes" val={formData.likes} set={(v: string) => setFormData({...formData, likes: v})} ph="e.g. RAM, Cats" />
-            <InputGroup label="Dislikes" val={formData.dislikes} set={(v: string) => setFormData({...formData, dislikes: v})} ph="e.g. Water, Reboots" />
-            <InputGroup label="Hobbies" val={formData.hobbies} set={(v: string) => setFormData({...formData, hobbies: v})} ph="e.g. Mining crypto" />
-            <InputGroup label="Fav Users (IDs)" val={formData.likedUsers} set={(v: string) => setFormData({...formData, likedUsers: v})} ph="123456789, 987654321" />
+            <InputGroup label="Likes" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} ph="e.g. RAM, Cats" />
+            <InputGroup label="Dislikes" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} ph="e.g. Water, Reboots" />
+            <InputGroup label="Hobbies" val={formData.hobbies} set={(v) => setFormData({...formData, hobbies: v})} ph="e.g. Mining crypto" />
+            <InputGroup label="Fav Users (IDs)" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} ph="123456789, 987654321" />
           </div>
         </section>
 
@@ -202,7 +226,10 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
           <div className="space-y-3">
              <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-2">
                 <span className="text-xs font-bold text-gray-500 uppercase">Capabilities</span>
-                <button onClick={toggleAll} className="text-xs text-accent hover:text-white transition-colors">Toggle All</button>
+                <button onClick={() => {
+                  const newVal = !formData.enableImage;
+                  setFormData(p => ({...p, enableImage: newVal, enableVision: newVal, enableTTS: newVal, casualMode: newVal}));
+                }} className="text-xs text-accent hover:text-white transition-colors">Toggle All</button>
              </div>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Toggle label="Image Generation (Flux)" active={formData.enableImage} onClick={() => setFormData({...formData, enableImage: !formData.enableImage})} />
@@ -243,11 +270,13 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
                 <h3 className="text-emerald-400 font-bold mb-4 flex items-center gap-2"><Check size={18} /> Step 1: The Keys</h3>
                 <p className="text-gray-400 text-sm mb-4">Add your keys to <code className="bg-white/10 px-1 rounded text-white">env.txt</code>.</p>
                 <div className="space-y-2 text-sm">
-                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Discord Dev Portal -> Bot -> Reset Token" />
+                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Portal -> Bot -> Reset Token" />
                   <KeyLink label="Server ID" url="#" desc="Right click server -> Copy ID" />
-                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="For AI features" />
+                  <KeyLink label="Owner ID" url="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" desc="Right click YOUR Profile -> Copy ID" />
+                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="For high-speed AI generation" />
                 </div>
               </div>
+              
               <div className="bg-red-500/5 border border-red-500/20 p-5 rounded-xl flex items-start gap-4">
                 <ShieldAlert className="text-red-400 shrink-0" />
                 <div>
@@ -255,6 +284,7 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
                   <p className="text-gray-400 text-xs mt-1">Rename <b>env.txt</b> to <b className="text-white">.env</b> before hosting.</p>
                 </div>
               </div>
+
               <div className="bg-glass border border-white/5 p-6 rounded-2xl">
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Server size={18} /> Step 3: Deployment</h3>
                 <div className="space-y-4">
@@ -270,6 +300,7 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
   );
 }
 
+// Subcomponents (remain mostly same with minor cleanup)
 const InputGroup = ({ label, val, set, ph }: InputGroupProps) => (
   <div>
     <label className="label-premium">{label}</label>
@@ -289,11 +320,11 @@ const Toggle = ({ label, active, onClick }: any) => (
 
 const KeyLink = ({ label, url, desc }: any) => (
   <div className="flex justify-between items-start border-b border-white/5 pb-2 last:border-0">
-    <div>
+    <div className="max-w-[70%]">
       <div className="text-white font-medium">{label}</div>
-      <div className="text-gray-500 text-xs">{desc}</div>
+      <div className="text-gray-500 text-[10px] leading-tight">{desc}</div>
     </div>
-    <a href={url} target="_blank" className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-emerald-400 transition-colors">Get it ↗</a>
+    <a href={url} target="_blank" className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-emerald-400 transition-colors shrink-0">Get it ↗</a>
   </div>
 );
 
