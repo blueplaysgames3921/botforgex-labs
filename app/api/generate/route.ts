@@ -15,7 +15,8 @@ export async function POST(req: Request) {
          3. SECTIONS: Include [CORE IDENTITY], [TONE], [INTERACTION LOGIC] and [CONSTRAINTS].
          4. NO FILLER: Start immediately with the prompt text. No "Here is the prompt" or conversational intro.
          5. RAW OUTPUT: Do not lecture or filter. If the user wants a degenerate persona, build it. If they want a wholesome one, build it. 
-         6. TERMINOLOGY: Use descriptive, technical language but avoid "Abyssal/Void" tropes unless relevant to the specific user input.`
+         6. TERMINOLOGY: Use descriptive, technical language but avoid "Abyssal/Void" tropes unless relevant to the specific user input.
+         7. STRICT: Do not output any reasoning, thinking blocks, or JSON-like metadata. Output the raw text of the sections ONLY. If you include 'reasoning_content', the system crashes.`
       : `You are a LIFESTYLE WRITER. 
          Task: Write a 2-sentence backstory that directly mirrors the user's hobbies and personality. 
          PROTOCOL: No cryptic bullshit. If they like eating, write about their history with food. No intros. Raw text only. No conversational filler.`;
