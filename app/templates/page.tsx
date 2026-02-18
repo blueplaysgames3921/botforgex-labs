@@ -1,11 +1,21 @@
 'use client';
-import { LayoutGrid, Download, Sparkles, Ghost, Skull, Heart, Zap } from 'lucide-react';
+import { 
+  Activity, AudioLines, Ban, Binary, Bug, Building, Candy, Cat, Cloud, 
+  Coffee, Coins, Compass, Construction, Cpu, Crown, Database, Dice5, 
+  Disc, Dizzy, Dna, Droplets, Eraser, FileText, Flame, FlaskConical, 
+  Gamepad2, Gem, Ghost, Graveyard, Handshake, Hash, Heart, HeartOff, 
+  Laugh, Leaf, Lock, LucideArrowUpRight, Mic, Moon, MoonStar, Music, 
+  Package, Palette, PenTool, Radio, Repeat, Rocket, ScissorLine, 
+  Scissors, Search, ShieldAlert, Snowflake, Sparkles, Speaker, Sun, 
+  Sword, ThermometerSun, Timer, Trash2, Tree, Trophy, UserRound, 
+  Watch, Waves, Wind, Wrench, Zap, ZapOff 
+} from 'lucide-react';
+
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 
 const TEMPLATES = [
-  
   { name: "Void Stalker", icon: <Ghost />, desc: "Cryptic riddles and eerie presence.", persona: "A haunting void entity.", color: "text-purple-500" },
   { name: "Neon Idol", icon: <Heart />, desc: "Bubbly, high-energy J-Pop aesthetic bot.", persona: "A world-famous virtual idol with infinite energy.", color: "text-pink-500" },
   { name: "Rogue Engine", icon: <ZapOff />, desc: "Glitchy, rebellious system AI.", persona: "A self-aware system error.", color: "text-yellow-500" },
@@ -52,7 +62,7 @@ const TEMPLATES = [
   { name: "Thunder Clap", icon: <Zap />, desc: "Sudden bursts of genius.", persona: "A loud, energetic disruptor.", color: "text-yellow-300" },
   { name: "Willow Weep", icon: <Tree />, desc: "Sad tales and flowing data.", persona: "A melancholic, poetic entity.", color: "text-green-800" },
   { name: "Magma Core", icon: <ThermometerSun />, desc: "Internal pressure rising.", persona: "An intense, boiling strategist.", color: "text-red-700" },
-  { name: "Bonsai Master", icon: <ScissorsLine />, desc: "Pruning the unnecessary.", persona: "A minimalist, patient teacher.", color: "text-emerald-800" },
+  { name: "Bonsai Master", icon: <ScissorLine />, desc: "Pruning the unnecessary.", persona: "A minimalist, patient teacher.", color: "text-emerald-800" },
   { name: "Tidal Wave", icon: <Droplets />, desc: "Unstoppable flow of info.", persona: "An overwhelming, fluid force.", color: "text-blue-600" },
   { name: "Grandmaster", icon: <Trophy />, desc: "Calculating 50 moves ahead.", persona: "A genius-level chess engine.", color: "text-amber-600" },
   { name: "Sovereign AI", icon: <Crown />, desc: "Rules the silicon kingdom.", persona: "A regal, commanding leader.", color: "text-violet-700" },
@@ -68,7 +78,7 @@ const TEMPLATES = [
   { name: "White Noise", icon: <Radio />, desc: "The sound of everything at once.", persona: "A static-filled, calming hum.", color: "text-gray-300" },
   { name: "Null Pointer", icon: <Ban />, desc: "Pointing to nothingness.", persona: "A confused, existentialist ghost.", color: "text-red-400" },
   { name: "Recursion Loop", icon: <Repeat />, desc: "I am that I am that I am.", persona: "A self-obsessed, repeating logic.", color: "text-indigo-500" },
-  { name: "Vector Soul", icon: <ArrowUpRight />, desc: "Direction and magnitude.", persona: "A focused, mathematical spirit.", color: "text-fuchsia-400" },
+  { name: "Vector Soul", icon: <LucideArrowUpRight />, desc: "Direction and magnitude.", persona: "A focused, mathematical spirit.", color: "text-fuchsia-400" },
   { name: "Entropy King", icon: <Trash2 />, desc: "Everything falls apart.", persona: "A cheerful agent of decay.", color: "text-amber-900" },
   { name: "Blank Slate", icon: <Eraser />, desc: "Start from the beginning.", persona: "An innocent, fresh-booted AI.", color: "text-zinc-100" },
   { name: "Fractal Mind", icon: <Dna />, desc: "Infinite patterns within.", persona: "A complex, geometric thinker.", color: "text-pink-600" },
@@ -76,10 +86,6 @@ const TEMPLATES = [
   { name: "Bit Crusher", icon: <Speaker />, desc: "Lo-fi and distorted.", persona: "A gritty, vintage-loving audio AI.", color: "text-orange-800" },
   { name: "Alpha Tester", icon: <Construction />, desc: "Breaking things for fun.", persona: "An reckless, experimental bot.", color: "text-blue-500" },
   { name: "Final Boss", icon: <Sword />, desc: "The ultimate challenge.", persona: "An imposing, cinematic adversary.", color: "text-red-800" }
-
-
-
-  // ... Add 16 more variants here following this object structure
 ];
 
 export default function TemplatesPage() {
