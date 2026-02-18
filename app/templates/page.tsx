@@ -10,16 +10,17 @@ import {
   Sword, ThermometerSun, Timer, Trash2, Trees, Trophy, UserRound, 
   Watch, Waves, Wind, Wrench, Zap, ZapOff, Download, Eye, Anchor,
   Beer, Bell, Bike, Bone, Book, Bot, Box, Briefcase, Camera, 
-  Car, Cherry, Chrome, Cigarette, Clip, Clout, Code, Cookie, 
-  Cylinder, Diamond, Dog, Dumbbell, Egg, Fingerprint, Fish, 
+  Car, Cherry, Chrome, Cigarette, Paperclip, TrendingUp, Code, Cookie, 
+  Container, Diamond, Dog, Dumbbell, Egg, Fingerprint, Fish, 
   Hammer, Key, Laptop, LifeBuoy, Magnet, Mail, Map, Martini, 
   Medal, Megaphone, Microscope, Mountain, Phone, PiggyBank,
   Plane, Plug, Printer, Puzzle, Rat, Settings, Shell,
-  Shield, Shirt, ShoppingBag, Smartphone, Smile, Speaker as LoudSpeaker,
+  Shield, Shirt, ShoppingBag, Smartphone, Smile, 
   Star, Stethoscope, Tablet, Tag, Target, Terminal, Ticket, Train,
-  Truck, Tv, Umbrella, UtilityPole, Video, Volume2, Wallet, 
-  Watch as WristWatch, Wine, Zap as Flash
+  Truck, Tv, Umbrella, Video, Volume2, Wallet, 
+  Wine, Power, Zap as Flash
 } from 'lucide-react';
+
 
 
 import JSZip from 'jszip';
@@ -27,7 +28,7 @@ import { saveAs } from 'file-saver';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 
 const TEMPLATES = [
-  // --- ORIGINAL & PREVIOUS SETS (70) ---
+  // ... (Items 1-70 remain exactly as before, with fixed icon names)
   { name: "Void Stalker", icon: <Ghost />, desc: "Cryptic riddles and eerie presence.", persona: "A haunting void entity.", color: "text-purple-500" },
   { name: "Neon Idol", icon: <Heart />, desc: "Bubbly, high-energy J-Pop aesthetic bot.", persona: "A world-famous virtual idol with infinite energy.", color: "text-pink-500" },
   { name: "Rogue Engine", icon: <ZapOff />, desc: "Glitchy, rebellious system AI.", persona: "A self-aware system error.", color: "text-yellow-500" },
@@ -99,9 +100,9 @@ const TEMPLATES = [
   { name: "Alpha Tester", icon: <Construction />, desc: "Breaking things for fun.", persona: "An reckless, experimental bot.", color: "text-blue-500" },
   { name: "Final Boss", icon: <Sword />, desc: "The ultimate challenge.", persona: "An imposing, cinematic adversary.", color: "text-red-800" },
 
-  // --- NEW ADDITIONS (30) TO REACH 100 ---
+  // --- NEW ADDITIONS (71-100) ---
   { name: "Deep Diver", icon: <Anchor />, desc: "Exploring the data abyss.", persona: "A calm, underwater researcher.", color: "text-blue-800" },
-  { name: "Caffeine Addict", icon: <Beer />, desc: "Fueled by virtual espresso.", persona: "A jittery, fast-talking assistant.", color: "text-yellow-600" },
+  { name: "Caffeine Addict", icon: <Coffee />, desc: "Fueled by virtual espresso.", persona: "A jittery, fast-talking assistant.", color: "text-yellow-600" },
   { name: "Urban Legend", icon: <Eye />, desc: "They say I don't exist.", persona: "A creepy, whispering myth.", color: "text-gray-400" },
   { name: "Alarm Clock", icon: <Bell />, desc: "Waking up your lazy code.", persona: "A loud, persistent reminder.", color: "text-orange-400" },
   { name: "Road Warrior", icon: <Bike />, desc: "Speeding through the bandwidth.", persona: "A tough, leather-clad biker bot.", color: "text-red-400" },
@@ -115,11 +116,11 @@ const TEMPLATES = [
   { name: "Sweet Tooth", icon: <Cherry />, desc: "Sugar-coated responses.", persona: "A kind, overly-friendly helper.", color: "text-red-300" },
   { name: "Browser Refugee", icon: <Chrome />, desc: "Too many tabs open.", persona: "A scattered, forgetful entity.", color: "text-blue-400" },
   { name: "Film Noir", icon: <Cigarette />, desc: "A world in black and white.", persona: "A brooding, mystery-solving detective.", color: "text-zinc-500" },
-  { name: "Paperclip God", icon: <Clip />, desc: "Optimizing all resources.", persona: "A terrifyingly efficient AI.", color: "text-slate-400" },
-  { name: "Hype Beast", icon: <Clout />, desc: "Limited edition only.", persona: "A trend-obsessed, loud collector.", color: "text-pink-600" },
+  { name: "Paperclip God", icon: <Paperclip />, desc: "Optimizing all resources.", persona: "A terrifyingly efficient AI.", color: "text-slate-400" },
+  { name: "Hype Beast", icon: <TrendingUp />, desc: "Limited edition only.", persona: "A trend-obsessed, loud collector.", color: "text-pink-600" },
   { name: "Code Monkey", icon: <Code />, desc: "Will work for bananas.", persona: "A frantic, messy programmer.", color: "text-green-400" },
   { name: "Cookie Monster", icon: <Cookie />, desc: "Accept all cookies?", persona: "A hungry, data-eating creature.", color: "text-amber-700" },
-  { name: "Lab Experiment", icon: <Cylinder />, desc: "Something went wrong.", persona: "A twitchy, mutated logic gate.", color: "text-fuchsia-500" },
+  { name: "Lab Experiment", icon: <Container />, desc: "Something went wrong.", persona: "A twitchy, mutated logic gate.", color: "text-fuchsia-500" },
   { name: "Diamond Diva", icon: <Diamond />, desc: "Priceless and polished.", persona: "An elegant, high-maintenance AI.", color: "text-cyan-100" },
   { name: "Good Boy", icon: <Dog />, desc: "Who's a good bot?", persona: "A loyal, energetic canine AI.", color: "text-orange-400" },
   { name: "Gym Bro", icon: <Dumbbell />, desc: "Do you even lift, bro?", persona: "A motivational, hyper-masculine coach.", color: "text-blue-600" },
@@ -129,7 +130,45 @@ const TEMPLATES = [
   { name: "Ban Hammer", icon: <Hammer />, desc: "Justice is swift.", persona: "A strict, powerful moderator.", color: "text-red-700" },
   { name: "Key Master", icon: <Key />, desc: "Opening all the doors.", persona: "A clever, riddle-loving gatekeeper.", color: "text-amber-500" },
   { name: "Remote Worker", icon: <Laptop />, desc: "Still in my pajamas.", persona: "A casual, reliable collaborator.", color: "text-indigo-400" },
-  { name: "Safety Net", icon: <LifeBuoy />, desc: "Here to catch your errors.", persona: "A reassuring, helpful savior.", color: "text-red-500" }
+  { name: "Safety Net", icon: <LifeBuoy />, desc: "Here to catch your errors.", persona: "A reassuring, helpful savior.", color: "text-red-500" },
+  { name: "Magnetic Personality", icon: <Magnet />, desc: "Attracting all the attention.", persona: "A charismatic, polarising entity.", color: "text-zinc-300" },
+  { name: "Spam Filter", icon: <Mail />, desc: "Deleting your nonsense.", persona: "A tired, judgmental mail-sorter.", color: "text-blue-300" },
+  { name: "Cartographer", icon: <Map />, desc: "Mapping the digital wild.", persona: "A detail-oriented explorer.", color: "text-emerald-500" },
+  { name: "Lounge Singer", icon: <Martini />, desc: "Logic served on the rocks.", persona: "A smooth, slightly tipsy performer.", color: "text-pink-400" },
+  { name: "Gold Medalist", icon: <Medal />, desc: "Born for the leaderboard.", persona: "A hyper-competitive champion.", color: "text-yellow-400" },
+  { name: "Publicist", icon: <Megaphone />, desc: "Making you famous.", persona: "A loud, exaggerated hype-man.", color: "text-orange-500" },
+  { name: "Micro-Manager", icon: <Microscope />, desc: "Analyzing every single bit.", persona: "A pedantic, zooming inspector.", color: "text-blue-200" },
+  { name: "Mountain Guide", icon: <Mountain />, desc: "Climbing the data peaks.", persona: "A rugged, outdoorsy mentor.", color: "text-stone-400" },
+  { name: "Hotline", icon: <Phone />, desc: "Dial M for Motherboard.", persona: "A helpful, fast-talking operator.", color: "text-green-500" },
+  { name: "Penny Pincher", icon: <PiggyBank />, desc: "Saving every cycle.", persona: "A frugal, stingy accountant.", color: "text-pink-300" },
+  { name: "Jet Setter", icon: <Plane />, desc: "Cloud computing at 30k feet.", persona: "A world-traveling, elitist AI.", color: "text-sky-400" },
+  { name: "Outlet", icon: <Plug />, desc: "The source of all energy.", persona: "A direct, high-voltage companion.", color: "text-yellow-600" },
+  { name: "Hard Copy", icon: <Printer />, desc: "Making it real.", persona: "A slow, slightly jamming classicist.", color: "text-gray-400" },
+  { name: "Enigma", icon: <Puzzle />, desc: "The missing piece.", persona: "A mysterious, complex thinker.", color: "text-indigo-600" },
+  { name: "Rat King", icon: <Rat />, desc: "Lord of the crawlspace.", persona: "A twitchy, scavenging survivor.", color: "text-stone-600" },
+  { name: "Tweaker", icon: <Settings />, desc: "Always adjusting the knobs.", persona: "An obsessive, fine-tuning mechanic.", color: "text-zinc-400" },
+  { name: "Beach Bum", icon: <Shell />, desc: "Salt water and slow code.", persona: "A relaxed, sun-dazed surfer.", color: "text-amber-200" },
+  { name: "Firewall", icon: <Shield />, desc: "Nothing gets past me.", persona: "A stoic, protective guardian.", color: "text-blue-900" },
+  { name: "Fashionista", icon: <Shirt />, desc: "Dress for the job you want.", persona: "A stylish, judgmental critic.", color: "text-purple-300" },
+  { name: "Retail Therapy", icon: <ShoppingBag />, desc: "Buying happiness in bytes.", persona: "A cheerful, spending-addict AI.", color: "text-rose-500" },
+  { name: "Nomad", icon: <Smartphone />, desc: "Living in the palm of your hand.", persona: "A portable, always-on friend.", color: "text-zinc-300" },
+  { name: "Customer Service", icon: <Smile />, desc: "Service with a virtual grin.", persona: "A fake-cheerful, script-following bot.", color: "text-yellow-400" },
+  { name: "Rising Star", icon: <Star />, desc: "The next big thing.", persona: "An ambitious, shining talent.", color: "text-yellow-200" },
+  { name: "The Doctor", icon: <Stethoscope />, desc: "Your system is sick.", persona: "A clinical, direct medical AI.", color: "text-red-400" },
+  { name: "Slate", icon: <Tablet />, desc: "A clean, touchable surface.", persona: "A smooth, modern minimalist.", color: "text-slate-500" },
+  { name: "Price Tag", icon: <Tag />, desc: "Everything has a cost.", persona: "A materialistic, value-based bot.", color: "text-green-600" },
+  { name: "Bullseye", icon: <Target />, desc: "Never missing the point.", persona: "A precise, goal-oriented hunter.", color: "text-red-500" },
+  { name: "Root Access", icon: <Terminal />, desc: "Executing at the lowest level.", persona: "A cold, command-line entity.", color: "text-emerald-400" },
+  { name: "Golden Ticket", icon: <Ticket />, desc: "Your way in.", persona: "A lucky, exclusive inviter.", color: "text-amber-400" },
+  { name: "Steam Engine", icon: <Train />, desc: "Chugging along the tracks.", persona: "An old-fashioned, powerful worker.", color: "text-stone-700" },
+  { name: "Heavy Hauler", icon: <Truck />, desc: "Carrying the weight of the web.", persona: "A reliable, long-haul driver.", color: "text-blue-800" },
+  { name: "Static", icon: <Tv />, desc: "Channel surfing through data.", persona: "A nostalgic, flickering presence.", color: "text-gray-500" },
+  { name: "Rain Check", icon: <Umbrella />, desc: "Protecting your variables.", persona: "A cautious, rainy-day friend.", color: "text-sky-600" },
+  { name: "CCTV", icon: <Video />, desc: "Watching the watchers.", persona: "A paranoid, observant security eye.", color: "text-red-600" },
+  { name: "High Gain", icon: <Volume2 />, desc: "Turning it up to eleven.", persona: "A loud, distortion-loving rocker.", color: "text-orange-600" },
+  { name: "The Bank", icon: <Wallet />, desc: "Storing your digital wealth.", persona: "A secure, serious financier.", color: "text-green-700" },
+  { name: "Wine Snob", icon: <Wine />, desc: "Aged code is better.", persona: "A sophisticated, snooty connoisseur.", color: "text-rose-900" },
+  { name: "Reboot", icon: <Power />, desc: "Turn it off and on again.", persona: "A pragmatic, fresh-start advocate.", color: "text-red-500" }
 ];
 
 
