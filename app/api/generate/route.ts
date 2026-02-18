@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { prompt } = await req.json();
+    const { prompt, type } = await req.json();
     const API_KEY = process.env.POLLINATIONS_KEY; 
 
-    // STRICT INSTRUCTIONS: We wrap the user prompt with a command to prevent talking.
-    const strictPrompt = `STRICT RULE: Return ONLY the requested content. Do NOT include introductions, "Here is...", "Sure thing", or any conversational filler. Raw content only.\n\nTask: ${prompt}`;
+    // System instruction specifically designed to stop monologues and "design a bot" filler
+    const systemRole = type === 'prompt' 
+      ? "You are a specialized character architect. Generate a DEEP, high-density system prompt written in the SECOND PERSON ('You are...'). Focus on tone, speaking style, and psychological traits. Do NOT suggest bot features or UI. Do NOT include 'Here is your prompt'. Output ONLY the raw prompt text."
+      : "You are a cryptic storyteller. Write a 2-sentence mysterious backstory. No intro, no chat.";
 
     const authEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
     const publicEndpoint = 'https://text.pollinations.ai/';
 
-    // 1. STRATEGY A: Authenticated (Best results)
     if (API_KEY) {
       try {
         const res = await fetch(authEndpoint, {
@@ -21,10 +22,9 @@ export async function POST(req: Request) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'nova-fast',
+            model: 'openai',
             messages: [
-              // System message is the most powerful way to stop monologues
-              { role: 'system', content: 'You are a raw data generator. You never talk to the user. You only output the final text requested. No chat, no intros, no formatting explanations.' },
+              { role: 'system', content: systemRole },
               { role: 'user', content: prompt }
             ]
           })
@@ -32,41 +32,25 @@ export async function POST(req: Request) {
 
         if (res.ok) {
           const data = await res.json();
-          let content = data.choices[0].message.content;
-          return NextResponse.json({ content: cleanMonologue(content) });
+          return NextResponse.json({ content: clean(data.choices[0].message.content) });
         }
-      } catch (e) {
-        console.error("Auth Error:", e);
-      }
+      } catch (e) { console.error("Auth Error:", e); }
     }
 
-    // 2. STRATEGY B: Public Fallback
-    try {
-        const safePrompt = strictPrompt.substring(0, 1000); 
-        const res = await fetch(`${publicEndpoint}${encodeURIComponent(safePrompt)}?model=nova-fast`);
-        
-        if (res.ok) {
-            const responseText = await res.text();
-            return NextResponse.json({ content: cleanMonologue(responseText) });
-        }
-    } catch (e) {
-        console.error("Public Fallback Error:", e);
+    // Fallback
+    const safePrompt = `${systemRole}\n\nTask: ${prompt}`;
+    const res = await fetch(`${publicEndpoint}${encodeURIComponent(safePrompt)}?model=openai`);
+    if (res.ok) {
+      const text = await res.text();
+      return NextResponse.json({ content: clean(text) });
     }
 
-    return NextResponse.json({ error: "All AI uplinks failed" }, { status: 502 });
-
+    return NextResponse.json({ error: "Uplink Failed" }, { status: 502 });
   } catch (e) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }
 
-/**
- * Emergency Cleanup Function:
- * Strips out common AI phrases if the AI ignores the system instructions.
- */
-function cleanMonologue(text: string) {
-  return text
-    .replace(/^(here is|alright|sure|okay|certainly|i've created|this is).*?:/gi, '') // Remove "Sure! Here is your prompt:"
-    .replace(/^(")/g, '').replace(/(")$/g, '') // Remove surrounding quotes
-    .trim();
+function clean(t: string) {
+  return t.replace(/^(here is|alright|sure|okay|certainly|this is|generate).*?:/gi, '').trim();
 }
