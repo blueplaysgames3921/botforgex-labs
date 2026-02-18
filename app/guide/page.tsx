@@ -2,7 +2,7 @@ import { ShieldCheck, Key, Terminal, Cpu, Globe } from 'lucide-react';
 
 export default function GuidePage() {
   return (
-    <div className="min-h-screen bg-[#030303] text-white p-8 md:p-16 font-sans">
+    <div className="min-h-screen text-white p-8 md:p-16 font-sans relative z-10">
       <div className="max-w-4xl mx-auto space-y-12">
         <header>
           <h1 className="text-5xl font-black italic tracking-tighter uppercase text-white mb-2">Technical Documentation</h1>
