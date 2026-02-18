@@ -8,7 +8,8 @@ import {
   Terminal, Server, Key, Globe, Box, Rocket, 
   Activity, ShieldCheck, ExternalLink, Code2, 
   Settings, Target, Fingerprint, Radar, Gauge, ChevronRight,
-  MessageSquare, Heart, Skull, ZapOff, Ghost, Boxes, Link as LinkIcon
+  MessageSquare, Heart, Skull, ZapOff, Ghost, Boxes, Link as LinkIcon,
+  Layers, HardDrive, Share2
 } from 'lucide-react';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -132,9 +133,8 @@ export default function BotForgeUltimate() {
             </div>
           </GlassPanel>
 
-          {/* CONFIG SECTION (SLIDERS ARE HERE) */}
+          {/* CONFIG SECTION */}
           <GlassPanel title="Hardware Config" icon={<Cpu className="text-emerald-400" size={18}/>} color="border-emerald-500/30">
-            {/* RANGE SLIDERS */}
             <div className="mb-6 bg-white/[0.03] border border-white/5 rounded-2xl p-5 backdrop-blur-sm">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
@@ -177,13 +177,15 @@ export default function BotForgeUltimate() {
 
         {/* --- RIGHT PANEL --- */}
         <div className="lg:col-span-5 space-y-6">
+          
+          {/* CONSOLE */}
           <div className="rounded-3xl bg-[#080808] border border-white/10 overflow-hidden shadow-2xl">
             <div className="h-10 bg-white/5 border-b border-white/5 flex items-center justify-between px-6">
               <div className="flex items-center gap-2 text-[9px] font-mono text-gray-500 uppercase tracking-widest">
                 <Terminal size={12} className="text-cyan-500"/> System_Log
               </div>
             </div>
-            <div className="p-6 h-[250px] overflow-y-auto font-mono text-[10px] space-y-2 scrollbar-hide">
+            <div className="p-6 h-[200px] overflow-y-auto font-mono text-[10px] space-y-2 scrollbar-hide">
               {logs.map((log, i) => (
                 <div key={i} className="flex gap-3 border-l-2 border-cyan-500/20 pl-3">
                   <span className="text-zinc-600">{i.toString().padStart(2, '0')}</span> 
@@ -196,7 +198,9 @@ export default function BotForgeUltimate() {
 
           <AnimatePresence>
             {generated && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
+                
+                {/* UPLINKS */}
                 <div className="p-6 rounded-3xl bg-zinc-900/50 border border-white/10 backdrop-blur-xl">
                   <h3 className="text-xs font-black uppercase tracking-widest text-white mb-5 flex items-center gap-2">
                     <LinkIcon size={14} className="text-purple-400"/> External Uplinks
@@ -207,16 +211,47 @@ export default function BotForgeUltimate() {
                     <ExternalLinkBtn label="Discord IDs Guide" sub="How to find Server/User IDs" url="https://support.discord.com/hc/en-us/articles/206346498" btnText="READ GUIDE" />
                   </div>
                 </div>
-                <div className="p-8 rounded-[2rem] bg-gradient-to-br from-emerald-900/10 to-black border border-emerald-500/20">
-                  <h3 className="text-emerald-400 font-black uppercase tracking-[0.3em] text-xs mb-6 flex items-center gap-2">
-                    <ShieldCheck size={16}/> Launch Sequence
+
+                {/* --- THE REAL DEPLOYMENT MATRIX --- */}
+                <div className="p-6 rounded-3xl bg-black border border-white/10 space-y-6">
+                   <h3 className="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
+                    <Share2 size={16}/> Deployment Protocols
                   </h3>
-                  <div className="space-y-6">
-                    <Step n="1" t="Env Setup" d="Rename env.txt to .env and paste keys." />
-                    <Step n="2" t="Dependencies" d="Run 'npm install' in terminal." />
-                    <Step n="3" t="Ignition" d="Run 'node index.js' to start." />
+
+                  {/* OPTION 1: LOCAL */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-white uppercase tracking-tighter bg-white/5 p-2 rounded-lg">
+                      <HardDrive size={14} className="text-emerald-400"/> Method A: Local Host (Testing)
+                    </div>
+                    <div className="pl-4 space-y-2">
+                       <Step n="1" t="Extract & Config" d="Unzip file, rename env.txt to .env, fill keys." />
+                       <Step n="2" t="Install Runtime" d="Install Node.js from nodejs.org." />
+                       <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'." />
+                    </div>
+                  </div>
+
+                  <div className="h-[1px] bg-white/5 w-full" />
+
+                  {/* OPTION 2: VPS */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-white uppercase tracking-tighter bg-white/5 p-2 rounded-lg">
+                      <Server size={14} className="text-cyan-400"/> Method B: Dedicated VPS (24/7 Professional)
+                    </div>
+                    <div className="pl-4 space-y-2">
+                       <Step n="1" t="Sourcing" d="Get a Linux VPS (Ubuntu 22.04+) from AWS, DigitalOcean or Linode." />
+                       <Step n="2" t="Secure Transfer" d="Use SFTP (FileZilla) to upload bot files to /home/bot-directory." />
+                       <Step n="3" t="Process Management" d="Install PM2: 'npm install pm2 -g'. Run 'pm2 start index.js' to keep bot alive forever." />
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-red-400 uppercase">
+                      <ShieldAlert size={12}/> Security Warning
+                    </div>
+                    <p className="text-[8px] text-zinc-500 mt-1 font-mono">NEVER share your .env file. If your token leaks, anyone can hijack your bot's neural core.</p>
                   </div>
                 </div>
+
               </motion.div>
             )}
           </AnimatePresence>
@@ -281,11 +316,11 @@ const Label = ({ text, icon }: { text: string, icon?: any }) => (
 );
 
 const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
-  <div className="flex gap-5 group">
-    <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-sm font-black font-mono text-gray-600 group-hover:text-emerald-400 transition-all">{n}</div>
+  <div className="flex gap-4 group">
+    <div className="h-6 w-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[10px] font-black font-mono text-gray-600 group-hover:text-cyan-400 transition-all">{n}</div>
     <div>
-      <h5 className="text-white text-[10px] font-black uppercase tracking-widest">{t}</h5>
-      <p className="text-gray-500 text-[10px] mt-0.5 font-mono group-hover:text-gray-300">{d}</p>
+      <h5 className="text-white text-[9px] font-black uppercase tracking-widest">{t}</h5>
+      <p className="text-gray-500 text-[9px] mt-0.5 font-mono group-hover:text-gray-300 leading-relaxed">{d}</p>
     </div>
   </div>
 );
