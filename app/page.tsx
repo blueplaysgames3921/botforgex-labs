@@ -83,34 +83,42 @@ export default function BotForgeUltimate() {
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
-        
+
         {/* --- LEFT PANEL --- */}
-        <div className="lg:col-span-7 space-y-8">
-          
-          <header className="flex items-center gap-6">
-            <div className="relative group">
-              <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 to-purple-600 blur-xl opacity-40 group-hover:opacity-70 transition-all duration-500" />
-              <div className="relative h-16 w-16 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center">
-                <Boxes className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" size={32} />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-none bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500">
-                BotForge<span className="text-cyan-500 text-4xl align-top ml-1">X</span>
-              </h1>
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400 mt-1">Discord Chatbot Factory</p>
-            </div>
-            </div>
-          
-        <div className="flex items-center pb-1">
-    <div className="px-4 py-2 rounded-full bg-purple-600/10 border border-purple-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.15)] animate-pulse">
-      <span className="text-[10px] font-black uppercase tracking-[0.15em] text-purple-400 flex items-center gap-2">
-        <Sparkles size={12} className="text-purple-300" />
-        Make Discord Chatbots in <span className="italic text-white">Seconds</span>
-      </span>
+<div className="lg:col-span-7 space-y-8">
+  
+  <header className="flex flex-wrap items-center gap-6">
+    {/* Logo & Title Group */}
+    <div className="flex items-center gap-6">
+      <div className="relative group">
+        <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 to-purple-600 blur-xl opacity-40 group-hover:opacity-70 transition-all duration-500" />
+        <div className="relative h-16 w-16 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center">
+          <Boxes className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" size={32} />
+        </div>
+      </div>
+      <div>
+        <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-none bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500">
+          BotForge<span className="text-cyan-500 text-4xl align-top ml-1">X</span>
+        </h1>
+        <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400 mt-1">
+          Discord Chatbot Factory
+        </p>
+      </div>
     </div>
-  </div>
-</header>
+          
+    {/* Purple Badge Group */}
+    <div className="flex items-center">
+      <div className="px-4 py-2 rounded-full bg-purple-600/10 border border-purple-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.15)] animate-pulse">
+        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-purple-400 flex items-center gap-2">
+          <Sparkles size={12} className="text-purple-300" />
+          Make Discord Chatbots in <span className="italic text-white underline decoration-purple-500/50">Seconds</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+        
+       
 
           {/* IDENTITY SECTION */}
           <GlassPanel title="Identity Matrix" icon={<Fingerprint className="text-cyan-400" size={18}/>} color="border-cyan-500/30">
