@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   title: "Discord Bot Creator - Make Bots in 30 Seconds",
   description: "Free Discord bot creator with templates. Generate working Discord.js bots instantly. No coding required. Create your own multimodal AI personality.",
   verification: {
-    google: "<meta name="google-site-verification" content="kC-kuA97R9ZCDpar9AAtq0--uVgzRJC1K5YDWPTMeEc" />",
+    google: "kC-kuA97R9ZCDpar9AAtq0--uVgzRJC1K5YDWPTMeEc",
+  },
   keywords: ["discord bot creator", "discord bot maker", "discord bot template", "discord.js generator", "ai discord bot"],
   authors: [{ name: "BotForge Team" }],
   openGraph: {
