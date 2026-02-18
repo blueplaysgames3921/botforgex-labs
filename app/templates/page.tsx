@@ -187,7 +187,7 @@ export default function TemplatesPage() {
   };
 
   return (
-   <div className="min-h-screen text-white p-8 md:p-16 font-sans relative z-10">
+<div className="min-h-screen text-white p-8 pt-24 font-sans relative z-10">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-5xl font-black italic uppercase tracking-tighter mb-12">Persona <span className="text-purple-500">Templates</span></h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
