@@ -103,7 +103,7 @@ export default function BotForgeUltimate() {
               </h1>
               <div className="flex items-center gap-3 mt-1">
                 <span className="h-0.5 w-8 bg-gradient-to-r from-cyan-500 to-purple-500" />
-                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400">Systems Online</p>
+                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400">Dicord Chatbot Factory</p>
               </div>
             </div>
           </header>
@@ -135,7 +135,7 @@ export default function BotForgeUltimate() {
               <PremiumInput label="Likes" ph="Data, Efficiency" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} />
               <PremiumInput label="Dislikes" ph="Spam, Latency" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} />
               <PremiumInput label="Subroutines" ph="Moderation" val={formData.hobbies} set={(v) => setFormData({...formData, hobbies: v})} />
-              <PremiumInput label="Admin IDs" ph="User IDs" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} />
+              <PremiumInput label="Favorite Users (IDs)" ph="User IDs" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} />
             </div>
           </GlassPanel>
 
