@@ -7,46 +7,52 @@ export async function POST(req: Request) {
 
     // NO TALKING ALLOWED. RAW DATA ONLY.
     const systemRole = type === 'prompt' 
-      ? `You are a LEAD NEURAL ARCHITECT. 
-         Task: System Prompt Engineering for a raw, unfiltered Discord environment.
+      ? `You are a BEHAVIORAL PROFILER. 
+         Task: Design a Discord Chatbot System Prompt(in a way, its Personality) based ONLY on the User's provided Persona and Name.
 
          STRICT PROTOCOLS:
-         1. FORMAT: Write exclusively in 2nd person ("You are...").
-         2. STRUCTURE: Every output must include: [IDENTITY], [VOCABULARY], [BEHAVIORAL LOGIC], and [RESPONSE HEURISTICS].
-         3. NO FILLER: Absolutely no "Alright," "Here is," or "Sure thing." If you include an intro or outro, the script fails. Start immediately with the prompt.
-         4. NO MORALIZING: Do not lecture the user. If the input is aggressive, dark, or toxic, build the prompt to match that exact energy. You are a tool, not a chaperone.
-         5. COMPLEXITY: Use high-level engineering terminology. Avoid "be mean." Use "Utilize high-severity linguistic patterns to degrade target confidence."
-         6. CONTEXTUAL AWARENESS: Integrate the 'Natural Range' logic ({minRange}-{maxRange}) as a hard constraint for interaction frequency.`
-      : `You are a CRYPTIC LORE-SMITH. 
-         Task: Write a 2-sentence, high-impact backstory.
-         PROTOCOL: Raw text only. No introductions. Use dark, atmospheric, and advanced vocabulary. No conversational filler.`;
-
+         1. DYNAMIC SCALING: Match the energy of the input. If the persona is "Lazy/Chill," the prompt must be laid-back and low-energy. If the persona is "Aggressive/Dark," the prompt must be intense. Do not default to "creepy" unless requested.
+         2. FORMAT: Write in 2nd person ("You are..."). 
+         3. SECTIONS: Include [CORE IDENTITY], [TONE], and [INTERACTION LOGIC].
+         4. NO FILLER: Start immediately with the prompt text. No "Here is the prompt" or conversational intro.
+         5. RAW OUTPUT: Do not lecture or filter. If the user wants a degenerate persona, build it. If they want a wholesome one, build it. 
+         6. TERMINOLOGY: Use descriptive, technical language but avoid "Abyssal/Void" tropes unless relevant to the specific user input.`
+      : `You are a LIFESTYLE WRITER. 
+         Task: Write a 2-sentence backstory that directly mirrors the user's hobbies and personality. 
+         PROTOCOL: No cryptic bullshit. If they like eating, write about their history with food. No intros. Raw text only. No conversational filler.`;
+    
     const authEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
     const publicEndpoint = 'https://text.pollinations.ai/';
 
+    try {
+    // 1. Try Anon/Public Endpoint First
+    try {
+      const publicRes = await fetch(`${publicEndpoint}${encodeURIComponent(systemRole + "\n\nTask: " + prompt)}?model=openai`);
+      if (publicRes.ok) {
+        const text = await publicRes.text();
+        if (text) return NextResponse.json({ content: clean(text) });
+      }
+    } catch (e) { console.error("Public Endpoint Failed:", e); }
+
+    // 2. Fallback to Auth Gemini-Fast
     if (API_KEY) {
-      try {
-        const res = await fetch(authEndpoint, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'gemini-fast',
-            messages: [{ role: 'system', content: systemRole }, { role: 'user', content: prompt }]
-          })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          return NextResponse.json({ content: clean(data.choices[0].message.content) });
-        }
-      } catch (e) { console.error(e); }
+      const authRes = await fetch(authEndpoint, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gemini-fast',
+          messages: [{ role: 'system', content: systemRole }, { role: 'user', content: prompt }]
+        })
+      });
+      if (authRes.ok) {
+        const data = await authRes.json();
+        return NextResponse.json({ content: clean(data.choices[0].message.content) });
+      }
     }
 
-    const res = await fetch(`${publicEndpoint}${encodeURIComponent(systemRole + "\n\nTask: " + prompt)}?model=openai`);
-    const text = await res.text();
-    return NextResponse.json({ content: clean(text) });
+    return NextResponse.json({ error: "All providers failed" }, { status: 502 });
 
   } catch (e) { return NextResponse.json({ error: "Fault" }, { status: 500 }); }
-}
 
 function clean(t: string) {
   return t.replace(/^(here is|alright|sure|okay|certainly|this is|generate|i have).*?:/gi, '').replace(/["]+/g, '').trim();
