@@ -30,7 +30,7 @@ export async function POST(req: Request) {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'nova-fast',
+            model: 'gemini-fast',
             messages: [{ role: 'system', content: systemRole }, { role: 'user', content: prompt }]
           })
         });
