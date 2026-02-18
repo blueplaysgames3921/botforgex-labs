@@ -21,11 +21,14 @@ export default function RootLayout({
         {/* SHARED NAVBAR */}
         <Navbar />
 
-        {/* --- THE NEBULA CHROMATIC BACKGROUND (PERSISTENT) --- */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[150px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 blur-[150px] animate-pulse delay-1000" />
+        {/* --- THE NEBULA CHROMATIC BACKGROUND --- */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          {/* Pulsing Orbs using the new CSS animation class */}
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[150px] animate-nebula" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 blur-[150px] animate-nebula [animation-delay:2s]" />
           <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] bg-cyan-500/10 blur-[120px]" />
+          
+          {/* Texture Overlays */}
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
           <div className="absolute inset-0 bg-grid-white/[0.03] bg-[size:40px_40px]" />
         </div>
@@ -35,15 +38,6 @@ export default function RootLayout({
           {children}
         </main>
 
-        <style jsx global>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-          }
-          .animate-pulse {
-            animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-        `}</style>
       </body>
     </html>
   );
