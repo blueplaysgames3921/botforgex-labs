@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'openai',
+            model: 'nova-fast',
             messages: [
               { role: 'system', content: systemRole },
               { role: 'user', content: prompt }
