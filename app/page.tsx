@@ -100,7 +100,17 @@ export default function BotForgeUltimate() {
               </h1>
               <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400 mt-1">Discord Chatbot Factory</p>
             </div>
-          </header>
+            </div>
+          
+        <div className="flex items-center pb-1">
+    <div className="px-4 py-2 rounded-full bg-purple-600/10 border border-purple-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.15)] animate-pulse">
+      <span className="text-[10px] font-black uppercase tracking-[0.15em] text-purple-400 flex items-center gap-2">
+        <Sparkles size={12} className="text-purple-300" />
+        Make Discord Chatbots in <span className="italic text-white">Seconds</span>
+      </span>
+    </div>
+  </div>
+</header>
 
           {/* IDENTITY SECTION */}
           <GlassPanel title="Identity Matrix" icon={<Fingerprint className="text-cyan-400" size={18}/>} color="border-cyan-500/30">
