@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'openai',
+            model: 'nova-fast',
             messages: [{ role: 'system', content: systemRole }, { role: 'user', content: prompt }]
           })
         });
