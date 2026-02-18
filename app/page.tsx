@@ -3,7 +3,10 @@
 import React, { useState } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { Download, Cpu, Sparkles, Check, Zap, ShieldAlert, Terminal, Server, Key, User } from 'lucide-react';
+import { 
+  Download, Cpu, Sparkles, Check, Zap, ShieldAlert, 
+  Terminal, Server, Key, Globe, Box, Rocket 
+} from 'lucide-react';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -18,7 +21,7 @@ interface InputGroupProps {
 export default function BotFactory() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
-  const [logs, setLogs] = useState<string[]>(['> System ready.']);
+  const [logs, setLogs] = useState<string[]>(['> Engine Initialized.']);
 
   const [formData, setFormData] = useState({
     botName: '',
@@ -38,7 +41,6 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
-  // NEW SIMPLIFIED CALL - TRUSTS THE SERVER
   const callAI = async (prompt: string) => {
     try {
       const res = await fetch('/api/generate', {
@@ -46,17 +48,11 @@ export default function BotFactory() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
-
       const data = await res.json();
-      
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Server Error");
-      }
-      
+      if (!res.ok || data.error) throw new Error(data.error || "Server Error");
       return data.content;
     } catch (e) {
       console.error(e);
-      // If server fails completely, return the prompt itself so the zip still builds
       return prompt; 
     }
   };
@@ -69,44 +65,43 @@ export default function BotFactory() {
 
     setLoading(true);
     setGenerated(false);
-    updateLog(`Connecting to Nova-Fast via Secure Route...`);
+    updateLog(`Establishing Neural Uplink...`);
 
     let finalSysPrompt = formData.personaRaw;
     let finalBackstory = formData.backstoryRaw;
     let temperature = "0.7";
 
     try {
-      updateLog('Generating high-density system prompt...');
+      updateLog('Encoding High-Density Logic...');
       const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`);
-      // Ensure we don't get stuck with a failed prompt return
-      if (aiPrompt !== `Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`) {
-         finalSysPrompt = aiPrompt.substring(0, 800).replace(/\n/g, ' ');
+      if (aiPrompt && aiPrompt.length > 20) {
+         finalSysPrompt = aiPrompt.substring(0, 900).replace(/\n/g, ' ');
       }
 
-      updateLog('Fabricating backstory...');
+      updateLog('Synthesizing History...');
       const aiStory = await callAI(`Write a 2-sentence mysterious backstory for: ${formData.backstoryRaw || formData.personaRaw}`);
-      if (!aiStory.includes("mysterious backstory")) {
+      if (aiStory && aiStory.length > 5) {
           finalBackstory = aiStory.replace(/\n/g, ' ');
       }
 
-      updateLog('Analyzing creativity index...');
-      const tempRes = await callAI(`Analyze this: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
+      updateLog('Optimizing Creativity Matrix...');
+      const tempRes = await callAI(`Analyze: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
       const extractedTemp = tempRes.match(/0\.\d+/)?.[0];
       if (extractedTemp) temperature = extractedTemp;
 
     } catch (err) {
-      updateLog('Uplink Busy: Using raw input data.');
+      updateLog('Latency Detected: Proceeding with raw data.');
     }
 
     try {
       const envContent = `
-# ═══ USER PROVIDED CREDENTIALS ═══
+# ═══ CREDENTIALS ═══
 BOT_TOKEN=
 POLLINATIONS_KEY=
 OWNER_ID=
 SERVER_ID=
 
-# ═══ AI GENERATED IDENTITY ═══
+# ═══ IDENTITY ═══
 BOT_NAME="${formData.botName}"
 SYSTEM_PROMPT="${finalSysPrompt}"
 BACKSTORY="${finalBackstory}"
@@ -116,15 +111,12 @@ LIKED_USERS="${formData.likedUsers}"
 CREATIVITY_LEVEL=${temperature}
 CASUAL_MODE=${formData.casualMode}
 
-# ═══ BEHAVIOR & RANGE ═══
+# ═══ BEHAVIOR ═══
 NATURAL_MIN=${formData.minRange}
 NATURAL_MAX=${formData.maxRange}
 ENABLE_IMAGE_GEN=${formData.enableImage}
 ENABLE_VISION=${formData.enableVision}
 ENABLE_TTS=${formData.enableTTS}
-
-# ═══ DO NOT TOUCH ═══
-UNIVERSAL_ENDPOINT=gen.pollinations.ai
 `;
 
       const zip = new JSZip();
@@ -137,110 +129,95 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
       const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, `${formData.botName.replace(/\s/g, '_')}_CORE.zip`);
 
-      updateLog('Build Complete. Core Downloaded.');
+      updateLog('Fabrication Complete. Downloading Core.');
       setGenerated(true);
     } catch (err) {
-      updateLog('Critical Error: Compression failed.');
+      updateLog('Critical: Compile failure.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-12 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 font-sans">
       
-      {/* LEFT COLUMN */}
-      <div className="lg:col-span-7 space-y-8">
-        <header className="flex items-center gap-4 mb-8">
-          <div className="h-12 w-12 bg-accent rounded-xl flex items-center justify-center shadow-lg shadow-accent/20">
-            <Cpu className="text-white" size={24} />
+      {/* LEFT COLUMN: EDITOR */}
+      <div className="lg:col-span-7 space-y-10">
+        <header className="flex items-center gap-5">
+          <div className="h-14 w-14 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+            <Cpu className="text-white" size={30} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">BotForge</h1>
-            <p className="text-gray-500 text-sm font-mono">Powered by Nova-Fast</p>
+            <h1 className="text-4xl font-black tracking-tighter italic uppercase">BotForge<span className="text-cyan-400">.v2</span></h1>
+            <p className="text-gray-500 text-xs font-mono uppercase tracking-[0.2em]">Neural Discord Architect</p>
           </div>
         </header>
 
-        <section className="bg-glass border border-white/5 p-6 rounded-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-6 text-accent">
-            <Sparkles size={18} />
-            <h2 className="text-lg font-bold tracking-wide">IDENTITY MATRIX</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="label-premium">Designation (Name)</label>
-              <input type="text" className="input-premium" placeholder="e.g. Nexus-9" 
-                value={formData.botName} onChange={e => setFormData({...formData, botName: e.target.value})} />
+        {/* INPUT SECTIONS */}
+        <div className="space-y-6">
+          <Section icon={<Sparkles size={18}/>} title="Identity Matrix" color="text-blue-400">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+              <InputGroup label="Designation" val={formData.botName} set={(v) => setFormData({...formData, botName: v})} ph="e.g. Ghost-6" />
+              <InputGroup label="Base Persona" val={formData.personaRaw} set={(v) => setFormData({...formData, personaRaw: v})} ph="e.g. Grumpy Mechanic" />
             </div>
-            <div>
-              <label className="label-premium">Core Persona</label>
-              <input type="text" className="input-premium" placeholder="e.g. Sassy, tired sysadmin" 
-                 value={formData.personaRaw} onChange={e => setFormData({...formData, personaRaw: e.target.value})} />
-            </div>
-          </div>
-          <div>
             <label className="label-premium">Backstory Context</label>
-            <textarea className="input-premium h-24 resize-none" placeholder="Origin story, hidden motives..."
+            <textarea className="input-premium h-24 resize-none" placeholder="Deep lore, secrets, or origins..."
                value={formData.backstoryRaw} onChange={e => setFormData({...formData, backstoryRaw: e.target.value})} />
-          </div>
-        </section>
+          </Section>
 
-        <section className="bg-glass border border-white/5 p-6 rounded-2xl backdrop-blur-sm">
-           <div className="flex items-center gap-2 mb-6 text-blue-400">
-            <Zap size={18} />
-            <h2 className="text-lg font-bold tracking-wide">PERSONALITY VECTORS</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputGroup label="Likes" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} ph="e.g. RAM, Cats" />
-            <InputGroup label="Dislikes" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} ph="e.g. Water, Reboots" />
-            <InputGroup label="Hobbies" val={formData.hobbies} set={(v) => setFormData({...formData, hobbies: v})} ph="e.g. Mining crypto" />
-            <InputGroup label="Fav Users (IDs)" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} ph="123456789, 987654321" />
-          </div>
-        </section>
+          <Section icon={<Zap size={18}/>} title="Social Alignment" color="text-yellow-400">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputGroup label="Likes" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} ph="Coffee, Code" />
+              <InputGroup label="Dislikes" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} ph="Lag, Water" />
+            </div>
+          </Section>
 
-        <section className="bg-glass border border-white/5 p-6 rounded-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-6 text-emerald-400">
-            <Server size={18} />
-            <h2 className="text-lg font-bold tracking-wide">NEURAL CONFIGURATION</h2>
-          </div>
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <label className="label-premium text-gray-300">Natural Messaging Frequency</label>
-              <span className="text-xs font-mono text-emerald-400">Every {formData.minRange} - {formData.maxRange} msgs</span>
+          <Section icon={<Server size={18}/>} title="Neural Config" color="text-emerald-400">
+            <div className="mb-6">
+              <div className="flex justify-between mb-3">
+                <label className="label-premium">Natural Interaction Frequency</label>
+                <span className="text-xs font-mono text-emerald-400">Range: {formData.minRange}-{formData.maxRange} msgs</span>
+              </div>
+              <div className="flex gap-4 items-center bg-white/5 p-4 rounded-xl border border-white/10">
+                <input type="range" min="1" max="20" value={formData.minRange} onChange={e => setFormData({...formData, minRange: parseInt(e.target.value)})} className="w-full accent-emerald-500" />
+                <input type="range" min="21" max="100" value={formData.maxRange} onChange={e => setFormData({...formData, maxRange: parseInt(e.target.value)})} className="w-full accent-emerald-500" />
+              </div>
             </div>
-            <div className="flex gap-4 items-center bg-black/20 p-4 rounded-lg">
-              <input type="range" min="1" max="20" value={formData.minRange} onChange={e => setFormData({...formData, minRange: parseInt(e.target.value)})} className="w-full accent-emerald-500" />
-              <input type="range" min="21" max="100" value={formData.maxRange} onChange={e => setFormData({...formData, maxRange: parseInt(e.target.value)})} className="w-full accent-emerald-500" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Toggle label="Image Synthesis" active={formData.enableImage} onClick={() => setFormData({...formData, enableImage: !formData.enableImage})} />
+                <Toggle label="Vision Processing" active={formData.enableVision} onClick={() => setFormData({...formData, enableVision: !formData.enableVision})} />
+                <Toggle label="Voice Output" active={formData.enableTTS} onClick={() => setFormData({...formData, enableTTS: !formData.enableTTS})} />
+                <Toggle label="Lowercase Mode" active={formData.casualMode} onClick={() => setFormData({...formData, casualMode: !formData.casualMode})} />
             </div>
-          </div>
-          <div className="space-y-3">
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Toggle label="Image Generation" active={formData.enableImage} onClick={() => setFormData({...formData, enableImage: !formData.enableImage})} />
-                <Toggle label="Vision (Gemini)" active={formData.enableVision} onClick={() => setFormData({...formData, enableVision: !formData.enableVision})} />
-                <Toggle label="Voice (TTS)" active={formData.enableTTS} onClick={() => setFormData({...formData, enableTTS: !formData.enableTTS})} />
-                <Toggle label="Casual (Lowercase)" active={formData.casualMode} onClick={() => setFormData({...formData, casualMode: !formData.casualMode})} />
-             </div>
-          </div>
-        </section>
+          </Section>
+        </div>
 
         <button 
           onClick={handleGenerate}
           disabled={loading}
-          className="w-full py-5 rounded-xl bg-gradient-to-r from-accent to-purple-600 hover:to-purple-500 text-white font-bold text-lg shadow-xl shadow-purple-900/30 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+          className="w-full py-6 rounded-2xl bg-white text-black font-black text-xl hover:bg-cyan-400 transition-all flex items-center justify-center gap-4 group"
         >
-          {loading ? <Cpu className="animate-spin" /> : <Download />}
-          {loading ? 'UPLINKING TO NOVA-FAST...' : 'GENERATE BOT CORE (.ZIP)'}
+          {loading ? <Cpu className="animate-spin" /> : <Download className="group-hover:translate-y-1 transition-transform" />}
+          {loading ? 'GENERATING...' : 'COMPILE BOT CORE'}
         </button>
       </div>
 
-      {/* RIGHT COLUMN */}
-      <div className="lg:col-span-5 space-y-6">
-        <div className="bg-[#0c0c0e] border border-white/10 rounded-xl overflow-hidden font-mono text-xs shadow-2xl">
-          <div className="bg-white/5 px-4 py-2 border-b border-white/5 flex items-center gap-2">
-            <Terminal size={14} className="text-gray-500" />
-            <span className="text-gray-500">factory_log.sh</span>
+      {/* RIGHT COLUMN: STATUS & GUIDES */}
+      <div className="lg:col-span-5 space-y-8">
+        {/* TERMINAL LOG */}
+        <div className="bg-[#0f0f11] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="bg-white/5 px-5 py-3 border-b border-white/10 flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+               <Terminal size={14} className="text-gray-400" />
+               <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">System_Output</span>
+            </div>
+            <div className="flex gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-red-500/50" />
+              <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+              <div className="w-2 h-2 rounded-full bg-green-500/50" />
+            </div>
           </div>
-          <div className="p-4 h-48 overflow-y-auto space-y-1 text-green-500/80">
+          <div className="p-6 h-56 overflow-y-auto font-mono text-xs space-y-2 text-cyan-500/90 scrollbar-hide">
             {logs.map((log, i) => <div key={i}>{log}</div>)}
             {loading && <div className="animate-pulse">_</div>}
           </div>
@@ -248,24 +225,72 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
 
         <AnimatePresence>
           {generated && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              <div className="bg-gradient-to-br from-gray-900 to-black border border-emerald-500/30 p-6 rounded-2xl relative overflow-hidden group">
-                <h3 className="text-emerald-400 font-bold mb-4 flex items-center gap-2"><Check size={18} /> Step 1: The Keys</h3>
-                <div className="space-y-2 text-sm">
-                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Portal -> Bot -> Reset Token" />
-                  <KeyLink label="Owner ID" url="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" desc="User Settings -> Advanced -> Developer Mode -> Right Click Profile -> Copy ID" />
-                  <KeyLink label="Server ID" url="#" desc="Right click server icon -> Copy ID" />
-                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="Get your own key for the bot's runtime" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+              
+              {/* CREDENTIALS SECTION */}
+              <div className="bg-gradient-to-br from-blue-900/20 to-black border border-blue-500/30 p-6 rounded-2xl">
+                <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2 uppercase tracking-tighter italic">
+                  <Key size={18} /> Required Credentials
+                </h3>
+                <div className="space-y-3">
+                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Bot -> Reset Token" />
+                  <KeyLink label="Owner ID" url="#" desc="Right Click your Profile -> Copy ID" />
+                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="Get API Key for the bot brain" />
                 </div>
               </div>
               
-              <div className="bg-red-500/5 border border-red-500/20 p-5 rounded-xl flex items-start gap-4">
-                <ShieldAlert className="text-red-400 shrink-0" />
+              {/* WARNING BOX */}
+              <div className="bg-red-500/10 border border-red-500/30 p-5 rounded-2xl flex items-start gap-4 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                <ShieldAlert className="text-red-500 shrink-0" size={24} />
                 <div>
-                  <h4 className="text-red-400 font-bold text-sm">CRITICAL: Rename the file</h4>
-                  <p className="text-gray-400 text-xs mt-1">Rename <b>env.txt</b> to <b className="text-white">.env</b> before hosting.</p>
+                  <h4 className="text-red-500 font-bold text-sm uppercase italic">Crucial Instruction</h4>
+                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                    Inside the ZIP, you will find <span className="text-white font-mono font-bold">env.txt</span>. 
+                    You <span className="underline decoration-red-500 text-white">must</span> rename this file to 
+                    <span className="text-white font-mono font-bold"> .env</span> before you start the bot.
+                  </p>
                 </div>
               </div>
+
+              {/* HOSTING & SETUP GUIDE */}
+              <div className="bg-[#111] border border-white/5 p-6 rounded-2xl space-y-6 shadow-2xl">
+                <h3 className="text-emerald-400 font-bold text-sm flex items-center gap-2 uppercase italic tracking-widest">
+                  <Globe size={18} /> Deployment Guide
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">1</div>
+                    <div>
+                      <h5 className="text-white text-sm font-bold">Install Node.js</h5>
+                      <p className="text-gray-500 text-[11px] mt-1">Extract the ZIP, open a terminal in that folder, and run: <code className="text-cyan-400">npm install</code></p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">2</div>
+                    <div>
+                      <h5 className="text-white text-sm font-bold">Hosting (Railway / VPS)</h5>
+                      <p className="text-gray-500 text-[11px] mt-1">We recommend **Railway.app**. Just upload this folder to GitHub, link it, and add your .env variables in their dashboard.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">3</div>
+                    <div>
+                      <h5 className="text-white text-sm font-bold">Launch</h5>
+                      <p className="text-gray-500 text-[11px] mt-1">Run <code className="text-emerald-400">node index.js</code> or use **PM2** to keep it running 24/7 on a server.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5 flex justify-center">
+                   <div className="flex items-center gap-2 text-[10px] text-gray-600 font-mono italic">
+                      <Rocket size={12} /> Ready for Ignition
+                   </div>
+                </div>
+              </div>
+
             </motion.div>
           )}
         </AnimatePresence>
@@ -274,30 +299,41 @@ UNIVERSAL_ENDPOINT=gen.pollinations.ai
   );
 }
 
-// Subcomponents
+// Visual Sub-components
+const Section = ({ icon, title, color, children }: any) => (
+  <section className="bg-white/[0.02] border border-white/5 p-7 rounded-3xl backdrop-blur-md relative overflow-hidden group">
+    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">{icon}</div>
+    <div className={`flex items-center gap-3 mb-8 ${color}`}>
+      {icon}
+      <h2 className="text-sm font-black uppercase tracking-[0.3em]">{title}</h2>
+    </div>
+    {children}
+  </section>
+);
+
 const InputGroup = ({ label, val, set, ph }: InputGroupProps) => (
-  <div>
-    <label className="label-premium">{label}</label>
+  <div className="space-y-2">
+    <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider ml-1">{label}</label>
     <input type="text" className="input-premium" placeholder={ph} value={val} onChange={e => set(e.target.value)} />
   </div>
 );
 
 const Toggle = ({ label, active, onClick }: any) => (
-  <div onClick={onClick} className={clsx("cursor-pointer border p-3 rounded-lg flex items-center gap-3 transition-all", 
-    active ? "bg-accent/10 border-accent/50" : "bg-black/20 border-white/5 hover:border-white/10")}>
-    <div className={clsx("w-4 h-4 rounded-sm flex items-center justify-center transition-colors", active ? "bg-accent" : "bg-gray-700")}>
-      {active && <Check size={12} className="text-white" />}
-    </div>
-    <span className={clsx("text-xs font-semibold", active ? "text-white" : "text-gray-500")}>{label}</span>
-  </div>
+  <button onClick={onClick} className={clsx("w-full px-4 py-4 rounded-xl flex items-center justify-between transition-all border font-bold text-[11px] uppercase tracking-tighter", 
+    active ? "bg-white text-black border-white" : "bg-transparent text-gray-500 border-white/10 hover:border-white/20")}>
+    <span>{label}</span>
+    {active ? <Check size={14} strokeWidth={3} /> : <div className="w-3 h-3 rounded-full border-2 border-gray-700" />}
+  </button>
 );
 
 const KeyLink = ({ label, url, desc }: any) => (
-  <div className="flex justify-between items-start border-b border-white/5 pb-2 last:border-0">
+  <div className="flex justify-between items-center group/item py-1">
     <div>
-      <div className="text-white font-medium">{label}</div>
-      <div className="text-gray-500 text-[10px]">{desc}</div>
+      <div className="text-white text-xs font-bold group-hover/item:text-blue-400 transition-colors">{label}</div>
+      <div className="text-gray-500 text-[9px] uppercase tracking-tighter">{desc}</div>
     </div>
-    <a href={url} target="_blank" className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-emerald-400 transition-colors shrink-0">Link ↗</a>
+    <a href={url} target="_blank" className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+      <Box size={14} className="text-blue-400" />
+    </a>
   </div>
 );
