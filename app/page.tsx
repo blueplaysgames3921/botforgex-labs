@@ -5,7 +5,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { 
   Download, Cpu, Sparkles, Check, Zap, ShieldAlert, 
-  Terminal, Server, Key, Globe, Box, Rocket 
+  Terminal, Server, Key, Globe, Box, Rocket, Info, Layers
 } from 'lucide-react';
 import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +41,14 @@ export default function BotFactory() {
 
   const updateLog = (msg: string) => setLogs(prev => [...prev, `> ${msg}`]);
 
+  // Clean AI response to remove "Sure! Here is your prompt" type monologues
+  const cleanAIResponse = (text: string) => {
+    return text
+      .replace(/^(here is|alright|sure|okay|i have created|this is).*?:/gi, '') // Removes "Sure, here is:"
+      .replace(/^(here's|certainly|no problem).*?\n/gi, '') // Removes "Certainly!"
+      .trim();
+  };
+
   const callAI = async (prompt: string) => {
     try {
       const res = await fetch('/api/generate', {
@@ -50,7 +58,7 @@ export default function BotFactory() {
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || "Server Error");
-      return data.content;
+      return cleanAIResponse(data.content);
     } catch (e) {
       console.error(e);
       return prompt; 
@@ -73,16 +81,12 @@ export default function BotFactory() {
 
     try {
       updateLog('Encoding High-Density Logic...');
-      const aiPrompt = await callAI(`Create a robust system prompt for a Discord bot. No markdown. Persona: ${formData.personaRaw}`);
-      if (aiPrompt && aiPrompt.length > 20) {
-         finalSysPrompt = aiPrompt.substring(0, 900).replace(/\n/g, ' ');
-      }
+      const aiPrompt = await callAI(`Create a professional, deep system prompt for a Discord bot. Do NOT include any intro or conversational filler. Return ONLY the prompt. Persona: ${formData.personaRaw}`);
+      if (aiPrompt && aiPrompt.length > 10) finalSysPrompt = aiPrompt.substring(0, 1000).replace(/\n/g, ' ');
 
       updateLog('Synthesizing History...');
-      const aiStory = await callAI(`Write a 2-sentence mysterious backstory for: ${formData.backstoryRaw || formData.personaRaw}`);
-      if (aiStory && aiStory.length > 5) {
-          finalBackstory = aiStory.replace(/\n/g, ' ');
-      }
+      const aiStory = await callAI(`Write a 2-sentence mysterious backstory. No intro text. Character: ${formData.backstoryRaw || formData.personaRaw}`);
+      if (aiStory && aiStory.length > 5) finalBackstory = aiStory.replace(/\n/g, ' ');
 
       updateLog('Optimizing Creativity Matrix...');
       const tempRes = await callAI(`Analyze: "${formData.personaRaw}". Return ONLY a number between 0.5 and 0.9.`);
@@ -153,7 +157,6 @@ ENABLE_TTS=${formData.enableTTS}
           </div>
         </header>
 
-        {/* INPUT SECTIONS */}
         <div className="space-y-6">
           <Section icon={<Sparkles size={18}/>} title="Identity Matrix" color="text-blue-400">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
@@ -166,17 +169,21 @@ ENABLE_TTS=${formData.enableTTS}
           </Section>
 
           <Section icon={<Zap size={18}/>} title="Social Alignment" color="text-yellow-400">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <InputGroup label="Likes" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} ph="Coffee, Code" />
               <InputGroup label="Dislikes" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} ph="Lag, Water" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputGroup label="Hobbies" val={formData.hobbies} set={(v) => setFormData({...formData, hobbies: v})} ph="Mining, Exploring" />
+              <InputGroup label="Fav Users (IDs)" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} ph="123456789, 987654321" />
             </div>
           </Section>
 
           <Section icon={<Server size={18}/>} title="Neural Config" color="text-emerald-400">
             <div className="mb-6">
               <div className="flex justify-between mb-3">
-                <label className="label-premium">Natural Interaction Frequency</label>
-                <span className="text-xs font-mono text-emerald-400">Range: {formData.minRange}-{formData.maxRange} msgs</span>
+                <label className="label-premium">Messaging Frequency</label>
+                <span className="text-xs font-mono text-emerald-400">{formData.minRange}-{formData.maxRange} messages</span>
               </div>
               <div className="flex gap-4 items-center bg-white/5 p-4 rounded-xl border border-white/10">
                 <input type="range" min="1" max="20" value={formData.minRange} onChange={e => setFormData({...formData, minRange: parseInt(e.target.value)})} className="w-full accent-emerald-500" />
@@ -195,29 +202,21 @@ ENABLE_TTS=${formData.enableTTS}
         <button 
           onClick={handleGenerate}
           disabled={loading}
-          className="w-full py-6 rounded-2xl bg-white text-black font-black text-xl hover:bg-cyan-400 transition-all flex items-center justify-center gap-4 group"
+          className="w-full py-6 rounded-2xl bg-white text-black font-black text-xl hover:bg-cyan-400 transition-all flex items-center justify-center gap-4 group disabled:opacity-50"
         >
           {loading ? <Cpu className="animate-spin" /> : <Download className="group-hover:translate-y-1 transition-transform" />}
-          {loading ? 'GENERATING...' : 'COMPILE BOT CORE'}
+          {loading ? 'PROCESSING...' : 'COMPILE BOT CORE (.ZIP)'}
         </button>
       </div>
 
       {/* RIGHT COLUMN: STATUS & GUIDES */}
       <div className="lg:col-span-5 space-y-8">
-        {/* TERMINAL LOG */}
         <div className="bg-[#0f0f11] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="bg-white/5 px-5 py-3 border-b border-white/10 flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-               <Terminal size={14} className="text-gray-400" />
-               <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">System_Output</span>
-            </div>
-            <div className="flex gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500/50" />
-              <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-              <div className="w-2 h-2 rounded-full bg-green-500/50" />
-            </div>
+          <div className="bg-white/5 px-5 py-3 border-b border-white/10 flex items-center justify-between font-mono text-[10px] text-gray-400 uppercase tracking-widest">
+            <div className="flex items-center gap-2"><Terminal size={14} /> factory_logs.sh</div>
+            <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500/50" /><div className="w-2 h-2 rounded-full bg-yellow-500/50" /><div className="w-2 h-2 rounded-full bg-green-500/50" /></div>
           </div>
-          <div className="p-6 h-56 overflow-y-auto font-mono text-xs space-y-2 text-cyan-500/90 scrollbar-hide">
+          <div className="p-6 h-48 overflow-y-auto font-mono text-xs space-y-2 text-cyan-500/90">
             {logs.map((log, i) => <div key={i}>{log}</div>)}
             {loading && <div className="animate-pulse">_</div>}
           </div>
@@ -225,69 +224,41 @@ ENABLE_TTS=${formData.enableTTS}
 
         <AnimatePresence>
           {generated && (
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               
-              {/* CREDENTIALS SECTION */}
               <div className="bg-gradient-to-br from-blue-900/20 to-black border border-blue-500/30 p-6 rounded-2xl">
-                <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2 uppercase tracking-tighter italic">
-                  <Key size={18} /> Required Credentials
-                </h3>
+                <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2 uppercase italic tracking-tighter"><Key size={18} /> Credentials Setup</h3>
                 <div className="space-y-3">
-                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Bot -> Reset Token" />
-                  <KeyLink label="Owner ID" url="#" desc="Right Click your Profile -> Copy ID" />
-                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="Get API Key for the bot brain" />
+                  <KeyLink label="Bot Token" url="https://discord.com/developers/applications" desc="Portal -> Bot -> Reset Token" />
+                  <KeyLink label="Owner ID" url="#" desc="User Settings -> Advanced -> Dev Mode -> Right Click Profile -> Copy ID" />
+                  <KeyLink label="Server ID" url="#" desc="Right click server icon -> Copy ID" />
+                  <KeyLink label="Pollinations Key" url="https://pollinations.ai" desc="API Key for bot logic" />
                 </div>
               </div>
               
-              {/* WARNING BOX */}
-              <div className="bg-red-500/10 border border-red-500/30 p-5 rounded-2xl flex items-start gap-4 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+              <div className="bg-red-500/10 border border-red-500/30 p-5 rounded-2xl flex items-start gap-4">
                 <ShieldAlert className="text-red-500 shrink-0" size={24} />
-                <div>
-                  <h4 className="text-red-500 font-bold text-sm uppercase italic">Crucial Instruction</h4>
-                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">
-                    Inside the ZIP, you will find <span className="text-white font-mono font-bold">env.txt</span>. 
-                    You <span className="underline decoration-red-500 text-white">must</span> rename this file to 
-                    <span className="text-white font-mono font-bold"> .env</span> before you start the bot.
+                <div className="text-xs leading-relaxed">
+                  <h4 className="text-red-500 font-bold uppercase italic">Important: Environment Setup</h4>
+                  <p className="text-gray-400 mt-1">
+                    Locate <span className="text-white font-mono font-bold">env.txt</span> and rename it to <span className="text-white font-mono font-bold">.env</span>. Fill in the keys above before starting.
                   </p>
                 </div>
               </div>
 
-              {/* HOSTING & SETUP GUIDE */}
-              <div className="bg-[#111] border border-white/5 p-6 rounded-2xl space-y-6 shadow-2xl">
-                <h3 className="text-emerald-400 font-bold text-sm flex items-center gap-2 uppercase italic tracking-widest">
-                  <Globe size={18} /> Deployment Guide
-                </h3>
+              {/* HIGH QUALITY DEPLOYMENT GUIDE */}
+              <div className="bg-[#111] border border-white/5 p-6 rounded-2xl space-y-6 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-5"><Rocket size={100} /></div>
+                <h3 className="text-emerald-400 font-bold text-sm flex items-center gap-2 uppercase italic tracking-widest"><Layers size={18} /> Hosting Roadmap</h3>
 
-                <div className="space-y-4">
-                  <div className="flex gap-4">
-                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">1</div>
-                    <div>
-                      <h5 className="text-white text-sm font-bold">Install Node.js</h5>
-                      <p className="text-gray-500 text-[11px] mt-1">Extract the ZIP, open a terminal in that folder, and run: <code className="text-cyan-400">npm install</code></p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">2</div>
-                    <div>
-                      <h5 className="text-white text-sm font-bold">Hosting (Railway / VPS)</h5>
-                      <p className="text-gray-500 text-[11px] mt-1">We recommend **Railway.app**. Just upload this folder to GitHub, link it, and add your .env variables in their dashboard.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-xs font-bold">3</div>
-                    <div>
-                      <h5 className="text-white text-sm font-bold">Launch</h5>
-                      <p className="text-gray-500 text-[11px] mt-1">Run <code className="text-emerald-400">node index.js</code> or use **PM2** to keep it running 24/7 on a server.</p>
-                    </div>
-                  </div>
+                <div className="space-y-6 relative z-10">
+                  <GuideItem num="1" title="Local Testing" text="Open terminal in the folder. Run 'npm install' then 'node index.js'." icon={<Box size={14}/>} />
+                  <GuideItem num="2" title="Railway (Cloud)" text="Fork to GitHub, connect to Railway. Add your .env variables in the 'Variables' tab. It stays online 24/7." icon={<Globe size={14}/>} />
+                  <GuideItem num="3" title="VPS / Linux" text="Use PM2 (npm install -g pm2) to run: 'pm2 start index.js'. This prevents the bot from crashing." icon={<Server size={14}/>} />
                 </div>
 
-                <div className="pt-4 border-t border-white/5 flex justify-center">
-                   <div className="flex items-center gap-2 text-[10px] text-gray-600 font-mono italic">
-                      <Rocket size={12} /> Ready for Ignition
-                   </div>
+                <div className="pt-4 border-t border-white/5 text-center italic text-[10px] text-gray-500 font-mono">
+                  Build #8292. Deployment Ready.
                 </div>
               </div>
 
@@ -299,10 +270,9 @@ ENABLE_TTS=${formData.enableTTS}
   );
 }
 
-// Visual Sub-components
+// Sub-components
 const Section = ({ icon, title, color, children }: any) => (
   <section className="bg-white/[0.02] border border-white/5 p-7 rounded-3xl backdrop-blur-md relative overflow-hidden group">
-    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">{icon}</div>
     <div className={`flex items-center gap-3 mb-8 ${color}`}>
       {icon}
       <h2 className="text-sm font-black uppercase tracking-[0.3em]">{title}</h2>
@@ -319,7 +289,7 @@ const InputGroup = ({ label, val, set, ph }: InputGroupProps) => (
 );
 
 const Toggle = ({ label, active, onClick }: any) => (
-  <button onClick={onClick} className={clsx("w-full px-4 py-4 rounded-xl flex items-center justify-between transition-all border font-bold text-[11px] uppercase tracking-tighter", 
+  <button onClick={onClick} className={clsx("w-full px-4 py-4 rounded-xl flex items-center justify-between border font-bold text-[11px] uppercase tracking-tighter transition-all", 
     active ? "bg-white text-black border-white" : "bg-transparent text-gray-500 border-white/10 hover:border-white/20")}>
     <span>{label}</span>
     {active ? <Check size={14} strokeWidth={3} /> : <div className="w-3 h-3 rounded-full border-2 border-gray-700" />}
@@ -327,13 +297,21 @@ const Toggle = ({ label, active, onClick }: any) => (
 );
 
 const KeyLink = ({ label, url, desc }: any) => (
-  <div className="flex justify-between items-center group/item py-1">
+  <div className="flex justify-between items-center py-1 group/item">
     <div>
       <div className="text-white text-xs font-bold group-hover/item:text-blue-400 transition-colors">{label}</div>
       <div className="text-gray-500 text-[9px] uppercase tracking-tighter">{desc}</div>
     </div>
-    <a href={url} target="_blank" className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-      <Box size={14} className="text-blue-400" />
-    </a>
+    <a href={url} target="_blank" className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"><Box size={14} className="text-blue-400" /></a>
+  </div>
+);
+
+const GuideItem = ({ num, title, text, icon }: any) => (
+  <div className="flex gap-4">
+    <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 font-bold text-xs text-emerald-400">{num}</div>
+    <div>
+      <h5 className="text-white text-sm font-bold flex items-center gap-2">{title} {icon}</h5>
+      <p className="text-gray-500 text-[11px] mt-1 leading-relaxed">{text}</p>
+    </div>
   </div>
 );
