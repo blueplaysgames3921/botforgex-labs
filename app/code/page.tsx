@@ -2,7 +2,7 @@ import { Github, ExternalLink, ShieldCheck, Box } from 'lucide-react';
 
 export default function CodePage() {
   return (
-    <div className="min-h-screen bg-[#030303] flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-8 relative z-10">
       <div className="max-w-2xl w-full p-12 rounded-[40px] bg-[#080808] border border-white/5 text-center space-y-8 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent shadow-[0_0_20px_#06b6d4]" />
         
