@@ -11,7 +11,7 @@ import {
   MessageSquare, Heart, Skull, ZapOff, Ghost, Boxes, Link as LinkIcon,
   Layers, HardDrive, Share2, Eye, X, Send
 } from 'lucide-react';
-import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
+import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -94,6 +94,7 @@ export default function BotForgeUltimate() {
       zip.file("package.json", PACKAGE_JSON);
       zip.file("index.js", INDEX_JS);
       zip.file("README.md", README_MD);
+      zip.file("launcher.cmd", LAUNCHER_CMD);
       zip.file("env.txt", envContent.trim());
       zip.file(".gitignore", "node_modules\n.env");
 
@@ -275,7 +276,7 @@ export default function BotForgeUltimate() {
                     <div className="pl-4 space-y-2">
                       <Step n="1" t="Extract & Config" d="Unzip file, rename env.txt to .env, fill keys." />
                       <Step n="2" t="Install Runtime" d="Install Node.js from nodejs.org." />
-                      <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'." />
+                      <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'. Or just run the launcher script provided[REQUIRES ADMINISTRATOR ACCESS]. It setups the environment and launches the bot if variables are properly configured." />
                     </div>
                   </div>
 
@@ -293,11 +294,21 @@ export default function BotForgeUltimate() {
                     </div>
                   </div>
 
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+  <div className="flex items-center gap-2 text-[9px] font-black text-emerald-500 uppercase">
+    <ShieldCheck size={12}/> Useful Tip
+  </div>
+  <p className="text-[8px] text-emerald-600/70 mt-1 font-mono">
+    For local hosters, you can run the launcher script in the zip. This installs/updates Node.js if not already there and launches the bot(variables in env.txt must be properly configured). Requires Administrator Access because Node.js needs it for installation. The script is safe, you can always turn it into a text file to check it.
+  </p>
+</div>
+
+
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                     <div className="flex items-center gap-2 text-[9px] font-black text-red-400 uppercase">
                       <ShieldAlert size={12}/> Security Warning
                     </div>
-                    <p className="text-[8px] text-zinc-500 mt-1 font-mono">NEVER share your .env file. If your token leaks, anyone can hijack your bot's neural core.</p>
+                    <p className="text-[8px] text-zinc-500 mt-1 font-mono"> Rename env.txt to .env if using external hosting or unsure about using the launcher script. NEVER share your .env file. If your token leaks, anyone can hijack your bot's neural core.</p>
                   </div>
                 </div>
 
