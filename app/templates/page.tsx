@@ -25,7 +25,7 @@ import {
 
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { INDEX_JS, PACKAGE_JSON, README_MD } from '@/lib/templates';
+import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD } from '@/lib/templates';
 
 const TEMPLATES = [
   // ... (Items 1-70 remain exactly as before, with fixed icon names)
@@ -179,6 +179,7 @@ export default function TemplatesPage() {
     
     zip.file("index.js", INDEX_JS);
     zip.file("package.json", PACKAGE_JSON);
+    zip.file("launcher.cmd", LAUNCHER_CMD);
     zip.file("README.md", README_MD);
     zip.file("env.txt", env);
     
