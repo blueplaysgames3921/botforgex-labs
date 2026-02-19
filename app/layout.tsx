@@ -9,7 +9,24 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "Discord Bot Creator - BotForgeX",
-  description: "Generate working Discord.js bots instantly.",
+  description: "Free Discord bot creator with templates. Generate working Discord.js bots instantly. No coding required. Create your own multimodal AI personality.",
+  verification: {
+    google: "kC-kuA97R9ZCDpar9AAtq0--uVgzRJC1K5YDWPTMeEc",
+  },
+  keywords: ["discord bot creator", "discord bot maker", "discord bot template", "discord.js generator", "ai discord bot"],
+  authors: [{ name: "BotForge Team" }],
+  openGraph: {
+    title: "BotForgeX | Discord Bot Creator", // This specifically kills the "Vercel" title
+    description: "Create your own multimodal AI personality in seconds.",
+    url: "https://discord-chatbot-creator.vercel.app/",
+    siteName: "BotForgeX",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BotForgeX | Discord Bot Generator",
+    description: "Make Discord Chatbots in seconds.",
+  },
 };
 
 export default function RootLayout({
