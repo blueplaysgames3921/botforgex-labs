@@ -322,6 +322,18 @@ const PremiumInput = ({ label, ph, val, set }: { label: string, ph: string, val:
   </div>
 );
 
+const ExternalLinkBtn = ({ label, sub, url, btnText }: any) => (
+  <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/[0.04] transition-all">
+    <div>
+      <div className="text-[10px] font-bold text-white uppercase tracking-wider">{label}</div>
+      <div className="text-[8px] text-zinc-600 font-mono uppercase mt-1">{sub}</div>
+    </div>
+    <a href={url} target="_blank" className="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+      {btnText}
+    </a>
+  </div>
+);
+
 const ToggleBtn = ({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) => (
   <button onClick={onClick} className={clsx("relative py-4 rounded-xl flex flex-col items-center justify-center gap-2 border transition-all duration-300", 
     active ? "bg-white/10 border-emerald-500/40" : "bg-black border-white/5 hover:border-white/10")}>
@@ -330,8 +342,18 @@ const ToggleBtn = ({ label, active, onClick }: { label: string, active: boolean,
   </button>
 );
 
-const Label = ({ text, icon }: { text: string, icon?: React.ReactNode }) => (
+const Label = ({ text, icon }: { text: string, icon?: any }) => (
   <label className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest ml-1 flex items-center gap-2">
     {icon} {text}
   </label>
+);
+
+const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
+  <div className="flex gap-4 group">
+    <div className="h-6 w-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black group-hover:border-cyan-500 transition-colors">{n}</div>
+    <div>
+      <div className="text-[10px] font-bold text-zinc-300 group-hover:text-white transition-colors">{t}</div>
+      <div className="text-[9px] text-zinc-600">{d}</div>
+    </div>
+  </div>
 );
