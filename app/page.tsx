@@ -137,8 +137,8 @@ export default function BotForgeUltimate() {
 
           <GlassPanel title="Identity Matrix" icon={<Fingerprint className="text-cyan-400" size={18}/>} color="border-cyan-500/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-              <PremiumInput label="Designation" ph="e.g. OMEGA-1" val={formData.botName} set={(v) => setFormData({...formData, botName: v})} />
-              <PremiumInput label="Neural Persona" ph="e.g. Sarcastic Assistant" val={formData.personaRaw} set={(v) => setFormData({...formData, personaRaw: v})} />
+              <PremiumInput label="Designation" ph="e.g. OMEGA-1" val={formData.botName} set={(v: string) => setFormData({...formData, botName: v})} />
+              <PremiumInput label="Neural Persona" ph="e.g. Sarcastic Assistant" val={formData.personaRaw} set={(v: string) => setFormData({...formData, personaRaw: v})} />
             </div>
             <div className="space-y-2">
               <Label text="Backstory Override (Premium Terminal)" icon={<MessageSquare size={12}/>} />
@@ -156,10 +156,10 @@ export default function BotForgeUltimate() {
 
           <GlassPanel title="Behavioral Logic" icon={<Target className="text-purple-400" size={18}/>} color="border-purple-500/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-              <PremiumInput label="Likes" ph="Data, Efficiency" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} />
-              <PremiumInput label="Dislikes" ph="Spam, Latency" val={formData.dislikes} set={(v) => setFormData({...formData, dislikes: v})} />
-              <PremiumInput label="Subroutines" ph="Moderation" val={formData.hobbies} set={(v) => setFormData({...formData, hobbies: v})} />
-              <PremiumInput label="Favorite Users (IDs)" ph="User IDs" val={formData.likedUsers} set={(v) => setFormData({...formData, likedUsers: v})} />
+              <PremiumInput label="Likes" ph="Data, Efficiency" val={formData.likes} set={(v: string) => setFormData({...formData, likes: v})} />
+              <PremiumInput label="Dislikes" ph="Spam, Latency" val={formData.dislikes} set={(v: string) => setFormData({...formData, dislikes: v})} />
+              <PremiumInput label="Subroutines" ph="Moderation" val={formData.hobbies} set={(v: string) => setFormData({...formData, hobbies: v})} />
+              <PremiumInput label="Favorite Users (IDs)" ph="User IDs" val={formData.likedUsers} set={(v: string) => setFormData({...formData, likedUsers: v})} />
             </div>
           </GlassPanel>
 
@@ -312,25 +312,13 @@ const GlassPanel = ({ children, title, icon, color }: any) => (
   </div>
 );
 
-const PremiumInput = ({ label, ph, val, set }: any) => (
+const PremiumInput = ({ label, ph, val, set }: { label: string, ph: string, val: string, set: (v: string) => void }) => (
   <div className="space-y-2 group">
     <Label text={label} />
     <input 
       type="text" value={val} onChange={e => set(e.target.value)} placeholder={ph}
       className="w-full bg-[#050505] border border-white/5 rounded-xl p-4 text-xs font-mono outline-none focus:border-cyan-500/40 transition-all text-gray-300 placeholder:text-gray-800"
     />
-  </div>
-);
-
-const ExternalLinkBtn = ({ label, sub, url, btnText }: any) => (
-  <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/[0.04] transition-all">
-    <div>
-      <div className="text-[10px] font-bold text-white uppercase tracking-wider">{label}</div>
-      <div className="text-[8px] text-zinc-600 font-mono uppercase mt-1">{sub}</div>
-    </div>
-    <a href={url} target="_blank" className="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-      {btnText}
-    </a>
   </div>
 );
 
@@ -342,18 +330,8 @@ const ToggleBtn = ({ label, active, onClick }: { label: string, active: boolean,
   </button>
 );
 
-const Label = ({ text, icon }: { text: string, icon?: any }) => (
+const Label = ({ text, icon }: { text: string, icon?: React.ReactNode }) => (
   <label className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest ml-1 flex items-center gap-2">
     {icon} {text}
   </label>
-);
-
-const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
-  <div className="flex gap-4 group">
-    <div className="h-6 w-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black group-hover:border-cyan-500 transition-colors">{n}</div>
-    <div>
-      <div className="text-[10px] font-bold text-zinc-300 group-hover:text-white transition-colors">{t}</div>
-      <div className="text-[9px] text-zinc-600">{d}</div>
-    </div>
-  </div>
 );
