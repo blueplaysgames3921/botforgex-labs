@@ -182,6 +182,7 @@ export default function TemplatesPage() {
     zip.file("launcher.cmd", LAUNCHER_CMD);
     zip.file("README.md", README_MD);
     zip.file("env.txt", env);
+    zip.file(".gitignore", "node_modules\n.env");
     
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, `${t.name.replace(/\s+/g, '_')}_TEMPLATE.zip`);
