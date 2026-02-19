@@ -275,8 +275,8 @@ export default function BotForgeUltimate() {
                     </div>
                     <div className="pl-4 space-y-2">
                       <Step n="1" t="Extract & Config" d="Unzip file, rename env.txt to .env, fill keys." />
-                      <Step n="2" t="Install Runtime" d="Install Node.js from nodejs.org." />
-                      <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'. Or just run the launcher script provided[REQUIRES ADMINISTRATOR ACCESS]. It setups the environment and launches the bot if variables are properly configured." />
+                      <Step n="2" t="Install Runtime" d="Install Node.js from nodejs.org.  Or just run the launcher script provided[REQUIRES ADMINISTRATOR ACCESS]. It setups the environment and launches the bot if variables are properly configured." />
+                      <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'. Or just run the launacher script[REQUIRES ADMINISTRATOR ACCESS]." />
                     </div>
                   </div>
 
