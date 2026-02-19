@@ -167,3 +167,89 @@ export const README_MD = `
 - **SERVER_ID**: Locks the bot to one server (security).
 - **OWNER_ID**: Allows YOU to use debug commands like \`!botcheck\`.
 `;
+export const LAUNCHER_CMD = `@echo off
+cd /d "%~dp0"
+title BotForgeX - Bot Launcher
+color 0b
+cls
+
+echo ============================================
+echo      BotForgeX Discord Bot Launcher
+echo      Created by: blueplaysgames3921
+echo      Powered by Pollinations.AI
+echo ============================================
+echo.
+echo WHAT THIS DOES:
+echo - Checks for Node.js (Required: v18 or higher)
+echo - Installs dependencies (discord.js, etc.)
+echo - Launches your AI persona
+echo.
+echo PREREQUISITES:
+echo 1. Open 'env.txt' and fill in your keys.
+echo 2. RENAME 'env.txt' to '.env' (Very Important!)
+echo 3. Ensure you have an active internet connection.
+echo.
+echo ============================================
+echo.
+pause
+
+:: Check for Node.js Existence
+node -v >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [!] ERROR: Node.js is NOT installed.
+    echo Opening https://nodejs.org/ ...
+    start https://nodejs.org/
+    echo Please install the LTS version and RESTART your PC.
+    pause
+    exit
+)
+
+:: Check for Node.js Version (Must be 18+)
+for /f "tokens=1,2,3 delims=.v" %%a in ('node -v') do set node_major=%%a
+if %node_major% lss 18 (
+    echo [!] ERROR: Your Node.js version (v%node_major%) is too old.
+    echo BotForgeX requires Node.js v18 or higher.
+    echo Opening https://nodejs.org/ to update...
+    start https://nodejs.org/
+    pause
+    exit
+)
+
+echo [OK] Node.js v%node_major% detected.
+echo.
+
+:: Check for .env file
+if not exist ".env" (
+    if exist "env.txt" (
+        echo [!] ALERT: You forgot to rename env.txt to .env
+        echo Attempting to auto-rename...
+        rename env.txt .env
+        echo [OK] Auto-renamed env.txt to .env
+    ) else (
+        echo [!] CRITICAL ERROR: .env file is missing!
+        echo Please create a .env file with your BOT_TOKEN.
+        pause
+        exit
+    )
+)
+
+echo [1/2] Installing/Updating dependencies...
+call npm install --no-audit --no-fund
+if %errorlevel% neq 0 (
+    echo [!] npm install failed. Check internet/permissions.
+    pause
+    exit
+)
+
+echo.
+echo [2/2] Launching Neural Core...
+echo ============================================
+echo      BOT IS NOW RUNNING ONLINE
+echo      Press Ctrl+C to shutdown
+echo ============================================
+echo.
+npm start
+echo.
+echo [SYSTEM] Process ended.
+pause`;
+
