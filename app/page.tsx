@@ -301,9 +301,11 @@ export default function BotForgeUltimate() {
                   </div>
                 </div>
 
-                {/* PREVIEW BUTTON */}
+                {/* PREVIEW / BUILD ACTIONS */}
                 <div className="p-6 rounded-3xl bg-black border border-white/10 space-y-6">
-                  <h3 className="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2"><Share2 size={16}/> Build Actions</h3>
+                  <h3 className="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
+                    <Share2 size={16}/> Build Actions
+                  </h3>
                   <div className="flex gap-3">
                     <button onClick={() => setShowPreview(true)} className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                       <Eye size={16} /> Preview App
@@ -378,7 +380,7 @@ export default function BotForgeUltimate() {
         )}
       </AnimatePresence>
 
-      <style jsx global>{`
+      <style>{`
         .animate-shimmer { background-size: 200% auto; animation: shimmer 2.5s linear infinite; }
         @keyframes shimmer { to { background-position: 200% center; } }
         ::-webkit-scrollbar { display: none; }
@@ -411,3 +413,35 @@ const PremiumInput = ({ label, ph, val, set }: { label: string, ph: string, val:
 const ExternalLinkBtn = ({ label, sub, url, btnText }: { label: string, sub: string, url: string, btnText: string }) => (
   <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5 group">
     <div>
+      <div className="text-[11px] font-bold text-white group-hover:text-cyan-400 transition-colors uppercase">{label}</div>
+      <div className="text-[9px] text-gray-500 font-mono">{sub}</div>
+    </div>
+    <a href={url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[9px] font-black text-cyan-400 uppercase hover:bg-cyan-500 hover:text-black transition-all">
+      {btnText}
+    </a>
+  </div>
+);
+
+const ToggleBtn = ({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) => (
+  <button onClick={onClick} className={clsx("relative py-4 rounded-xl flex flex-col items-center justify-center gap-2 border transition-all duration-300", 
+    active ? "bg-white/10 border-emerald-500/40" : "bg-black border-white/5 hover:border-white/10")}>
+    <div className={clsx("h-1.5 w-6 rounded-full transition-all", active ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-zinc-800")} />
+    <span className={clsx("text-[9px] font-black uppercase tracking-widest", active ? "text-emerald-400" : "text-zinc-600")}>{label}</span>
+  </button>
+);
+
+const Label = ({ text, icon }: { text: string, icon?: any }) => (
+  <label className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest ml-1 flex items-center gap-2">
+    {icon} {text}
+  </label>
+);
+
+const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
+  <div className="flex gap-4 group">
+    <div className="h-6 w-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[10px] font-black font-mono text-gray-600 group-hover:text-cyan-400 transition-all">{n}</div>
+    <div>
+      <h5 className="text-white text-[9px] font-black uppercase tracking-widest">{t}</h5>
+      <p className="text-gray-500 text-[9px] mt-0.5 font-mono group-hover:text-gray-300 leading-relaxed">{d}</p>
+    </div>
+  </div>
+);
