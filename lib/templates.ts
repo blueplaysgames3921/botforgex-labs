@@ -164,7 +164,7 @@ export const README_MD = `
 ## 🛠 Variables Explained
 - **BOT_TOKEN**: The login key for your bot.
 - **POLLINATIONS_KEY**: Allows the bot to use AI models freely.
-- **SERVER_ID**: Locks the bot to one server (security).
+- **SERVER_ID**: The server in which you want to use the bot.
 - **OWNER_ID**: Allows YOU to use debug commands like \`!botcheck\`.
 `;
 
