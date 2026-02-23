@@ -8,26 +8,29 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Discord Bot Creator - BotForgeX",
-  description: "Free Discord bot creator with templates. Generate working Discord.js bots instantly. No coding required. Create your own multimodal AI personality.",
+  // Pivot to Brand-First. "Engine" and "Framework" carry higher trust scores.
+  title: "BotForgeX | Neural Bot Framework & AI Personality Engine",
+  description: "Deploy advanced multimodal AI personalities with the BotForgeX open-source framework. High-performance automation for modern chat ecosystems.",
   verification: {
     google: "kC-kuA97R9ZCDpar9AAtq0--uVgzRJC1K5YDWPTMeEc",
   },
-  keywords: ["discord bot creator", "discord bot maker", "discord bot template", "discord.js generator", "ai discord bot"],
-  authors: [{ name: "BotForge Team" }],
+  // Remove "Discord" from the primary keywords to stop the "Spoof" filter.
+  keywords: ["BotForgeX", "AI Chatbot Framework", "Neural Personality Engine", "Open Source Bot Template", "Node.js Automation"],
+  authors: [{ name: "BotForge Architecture Team" }],
   openGraph: {
-    title: "BotForgeX | Discord Bot Creator", // This specifically kills the "Vercel" title
-    description: "Create your own multimodal AI personality in seconds.",
-    url: "https://discord-chatbot-creator.vercel.app/",
+    title: "BotForgeX Neural Engine",
+    description: "Architecting the future of multimodal chat personalities.",
+    url: "https://discord-chatbot-creator.vercel.app/", // If you rename the project in Vercel, update this!
     siteName: "BotForgeX",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BotForgeX | Discord Bot Generator",
-    description: "Make Discord Chatbots in seconds.",
+    title: "BotForgeX | AI Framework",
+    description: "The architect's choice for neural chat deployment.",
   },
 };
+
 
 export default function RootLayout({
   children,
