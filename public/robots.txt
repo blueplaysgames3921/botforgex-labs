@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://discord-chatbot-creator.vercel.app/sitemap.xml
+Sitemap: https://botforgex-labs.vercel.app/sitemap.xml
