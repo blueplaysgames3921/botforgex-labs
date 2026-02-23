@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   // Pivot to Brand-First. "Engine" and "Framework" carry higher trust scores.
-  title: "BotForgeX | Neural Bot Framework & AI Personality Engine",
+  title: "BotForgeX Labs | Neural Bot Framework & AI Personality Engine",
   description: "Deploy advanced multimodal AI personalities with the BotForgeX open-source framework. High-performance automation for modern chat ecosystems.",
   verification: {
     google: "kC-kuA97R9ZCDpar9AAtq0--uVgzRJC1K5YDWPTMeEc",
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BotForgeX Neural Engine",
     description: "Architecting the future of multimodal chat personalities.",
-    url: "https://discord-chatbot-creator.vercel.app/", // If you rename the project in Vercel, update this!
-    siteName: "BotForgeX",
+    url: "https://botforgex.vercel.app/", // If you rename the project in Vercel, update this!
+    siteName: "BotForgeX Labs",
     type: "website",
   },
   twitter: {
