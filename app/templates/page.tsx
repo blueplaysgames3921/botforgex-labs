@@ -25,7 +25,7 @@ import {
 
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD } from '@/lib/templates';
+import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD, LICENSE } from '@/lib/templates';
 
 const TEMPLATES = [
   // ... (Items 1-70 remain exactly as before, with fixed icon names)
@@ -179,10 +179,12 @@ export default function TemplatesPage() {
     
     zip.file("index.js", INDEX_JS);
     zip.file("package.json", PACKAGE_JSON);
-    zip.file("launcher.cmd", LAUNCHER_CMD);
+    zip.file("INSTALL_AND_LAUNCH.txt", LAUNCHER_CMD);
     zip.file("README.md", README_MD);
     zip.file("env.txt", env);
-    zip.file(".gitignore", "node_modules\n.env");
+    zip.file(".gitignore", "node_modules/\n.env\n.DS_Store\n package-lock.json");
+    zip.file("LICENSE", LICENSE);
+
     
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, `${t.name.replace(/\s+/g, '_')}_TEMPLATE.zip`);
