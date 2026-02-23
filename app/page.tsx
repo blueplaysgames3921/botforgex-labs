@@ -11,7 +11,7 @@ import {
   MessageSquare, Heart, Skull, ZapOff, Ghost, Boxes, Link as LinkIcon,
   Layers, HardDrive, Share2, Eye, X, Send
 } from 'lucide-react';
-import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD } from '@/lib/templates';
+import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD, LICENSE } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -94,10 +94,11 @@ export default function BotForgeUltimate() {
       zip.file("package.json", PACKAGE_JSON);
       zip.file("index.js", INDEX_JS);
       zip.file("README.md", README_MD);
-      zip.file("launcher.cmd", LAUNCHER_CMD);
       zip.file("env.txt", envContent.trim());
-      zip.file(".gitignore", "node_modules\n.env");
-
+      zip.file("INSTALL_AND_LAUNCH.txt", LAUNCHER_CMD);
+      zip.file(".gitignore", "node_modules/\n.env\n.DS_Store\n package-lock.json");
+      zip.file("LICENSE", LICENSE);
+      
       const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, `${formData.botName.toUpperCase()}_CORE.zip`);
       setGenerated(true);
@@ -274,9 +275,24 @@ export default function BotForgeUltimate() {
                       <HardDrive size={14} className="text-emerald-400"/> Method A: Local Host (Testing)
                     </div>
                     <div className="pl-4 space-y-2">
-                      <Step n="1" t="Extract & Config" d="Unzip file, rename env.txt to .env, fill keys." />
-                      <Step n="2" t="Install Runtime" d="Install Node.js from nodejs.org.  Or just run the launcher script provided[REQUIRES ADMINISTRATOR ACCESS]. It setups the environment and launches the bot if variables are properly configured." />
-                      <Step n="3" t="Execute" d="Open terminal in folder, run 'npm install' then 'node index.js'. Or just run the launacher script[REQUIRES ADMINISTRATOR ACCESS]." />
+                      <Step 
+  n="1" 
+  t="Identity Mapping" 
+  d="Extract the archive. Open 'env.txt' and input your Core Credentials: Bot Token, Pollinations API Key, Server ID, and Owner ID. This is the heart of the bot's access." 
+/>
+
+<Step 
+  n="2" 
+  t="Environment Ignition" 
+  d="Locate 'INSTALL_AND_LAUNCH.txt' and rename it to 'launch.cmd'. Run it as Admin to auto-setup Node.js. Alternatively, manually install Node.js (v18+) from nodejs.org if you prefer total control." 
+/>
+
+<Step 
+  n="3" 
+  t="Core Execution" 
+  d="Run 'launch.cmd' to initiate the automated uplink. For manual starts, rename 'env.txt' to '.env', open your terminal in the folder, and execute 'npm install' followed by 'node index.js'." 
+/>
+
                     </div>
                   </div>
 
@@ -299,7 +315,7 @@ export default function BotForgeUltimate() {
     <ShieldCheck size={12}/> Useful Tip
   </div>
   <p className="text-[8px] text-emerald-600/70 mt-1 font-mono">
-    For local hosters, you can run the launcher script in the zip. This installs/updates Node.js if not already there and launches the bot(variables in env.txt must be properly configured). Requires Administrator Access because Node.js needs it for installation. The script is safe, you can always turn it into a text file to check it.
+ For rapid deployment on local machines, the provided launcher script automates the entire environment sync. CRITICAL: You must rename INSTALL_AND_LAUNCH.txt to launch.cmd to enable execution. This script handles Node.js validation, dependency syncing, and auto-converts your env.txt to a live .env file. Administrator privileges are required solely for environment pathing and Node.js installation. The source is open—you can inspect the logic in any text editor before renaming.
   </p>
 </div>
 
