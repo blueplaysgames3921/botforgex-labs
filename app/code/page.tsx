@@ -16,7 +16,7 @@ export default function CodePage() {
         </p>
         
         <a 
-          href="https://github.com/blueplaysgames3921/multimodal-discord-chatbot-template"
+          href="https://github.com/blueplaysgames3921/botforgex-labs-template"
           target="_blank"
           className="flex items-center justify-center gap-3 w-full py-6 rounded-2xl bg-white text-black font-black uppercase italic tracking-[0.2em] hover:bg-cyan-500 transition-all group"
         >
