@@ -71,6 +71,38 @@ export default function RootLayout({
           {children}
         </main>
 
+                {/* --- GLOBAL SAFETY & BRAND FOOTER --- */}
+        <footer className="relative z-10 w-full py-12 border-t border-white/5 bg-black/20 backdrop-blur-sm mt-20">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-6">
+            
+            {/* Zero-Data Protocol Branding */}
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/10">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-emerald-500/80">
+                Secure Environment // No Data Retention // Client-Side Logic Only
+              </span>
+            </div>
+
+            {/* Legal / Relationship Disclaimers */}
+            <div className="text-center space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                BotForge<span className="text-cyan-500">X</span> Labs Neural Engine
+              </p>
+              <p className="max-w-md text-[9px] font-medium text-zinc-600 leading-relaxed uppercase tracking-tighter">
+                An independent open-source framework. This project is not affiliated with, 
+                sponsored by, or endorsed by Discord Inc. BotForgeX does not store, 
+                log, or transmit sensitive user credentials or bot tokens.
+              </p>
+            </div>
+
+            {/* Version / Copyright */}
+            <div className="text-[8px] font-mono text-zinc-800 uppercase tracking-widest">
+              © 2026 BotForgeX Laboratories // Multi-Modal v1.0.0-Stable
+            </div>
+          </div>
+        </footer>
+
+
       </body>
     </html>
   );
