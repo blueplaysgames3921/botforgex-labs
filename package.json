@@ -1,5 +1,5 @@
 {
-  "name": "bot-factory",
+  "name": "botforgex-labs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -17,7 +17,9 @@
     "jszip": "^3.10.1",
     "file-saver": "^2.0.5",
     "clsx": "^2.1.0",
-    "tailwind-merge": "^2.2.1"
+    "tailwind-merge": "^2.2.1",
+    "@vercel/kv": "latest",
+    "@upstash/ratelimit": "latest"
   },
   "devDependencies": {
     "typescript": "^5",
