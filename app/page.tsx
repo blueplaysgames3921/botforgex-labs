@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { 
@@ -9,7 +9,7 @@ import {
   Activity, ShieldCheck, ExternalLink, Code2, 
   Settings, Target, Fingerprint, Radar, Gauge, ChevronRight,
   MessageSquare, Heart, Skull, ZapOff, Ghost, Boxes, Link as LinkIcon,
-  Layers, HardDrive, Share2, Eye, X, Send
+  Layers, HardDrive, Share2, Eye, X, Send, ZapIcon, AlertTriangle
 } from 'lucide-react';
 import { INDEX_JS, PACKAGE_JSON, README_MD, LAUNCHER_CMD, LICENSE } from '@/lib/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,8 +19,9 @@ export default function BotForgeUltimate() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [logs, setLogs] = useState<string[]>(['> SYSTEM_READY', '> AWAITING_INPUT']);
+  const [showBuildModal, setShowBuildModal] = useState(false);
+  const [injectedKey, setInjectedKey] = useState<string | null>(null);
 
-  // Preview States
   const [showPreview, setShowPreview] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -33,6 +34,25 @@ export default function BotForgeUltimate() {
     hobbies: '', likedUsers: '', minRange: 5, maxRange: 15,
     enableImage: true, enableVision: true, enableTTS: true, casualMode: true,
   });
+
+  const APP_KEY = 'pk_QwI9DlHVHuMMlaPP';
+  const REDIRECT_URL = 'https://botforgex-labs.vercel.app';
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    const key = params.get('api_key');
+    
+    if (key) {
+      localStorage.setItem('botforgex_pollinations_key', key);
+      setInjectedKey(key);
+      window.history.replaceState({}, '', window.location.pathname);
+      updateLog("BYOP_UPLINK_SUCCESS: KEY_INJECTED_INTO_MEMORY");
+    } else {
+      const stored = localStorage.getItem('botforgex_pollinations_key');
+      if (stored) setInjectedKey(stored);
+    }
+  }, []);
 
   const updateLog = (msg: string) => setLogs(prev => [...prev.slice(-10), `> ${msg}`]);
 
@@ -64,8 +84,19 @@ export default function BotForgeUltimate() {
     }
   };
 
-  const handleGenerate = async () => {
+  const initiateBuildSequence = () => {
     if (!formData.botName || !formData.personaRaw) return alert("MISSING CORE DATA");
+    setShowBuildModal(true);
+  };
+
+  const handleGenerate = async (useBYOP = false) => {
+    setShowBuildModal(false);
+    if (useBYOP && !injectedKey) {
+      const authUrl = `https://enter.pollinations.ai/authorize?redirect_url=${REDIRECT_URL}&app_key=${APP_KEY}`;
+      window.location.href = authUrl;
+      return;
+    }
+
     setLoading(true); setGenerated(false);
     updateLog(`INITIALIZING: ${formData.botName.toUpperCase()}...`);
 
@@ -88,7 +119,10 @@ export default function BotForgeUltimate() {
       const finalBackstory = storyData.content || "Data corrupted.";
       updateLog('HISTORY FRAGMENTS ASSEMBLED.');
 
-      const envContent = `# CREDENTIALS\nBOT_TOKEN=\nPOLLINATIONS_KEY=\nOWNER_ID=\nSERVER_ID=\n\n# IDENTITY\nBOT_NAME="${formData.botName}"\nSYSTEM_PROMPT="${finalSysPrompt}"\nBACKSTORY="${finalBackstory}"\nHOBBIES="${formData.hobbies}"\nDISLIKES="${formData.dislikes}"\nLIKED_USERS="${formData.likedUsers}"\nCREATIVITY_LEVEL=0.75\nCASUAL_MODE=${formData.casualMode}\n\n# BEHAVIOR\nNATURAL_MIN=${formData.minRange}\nNATURAL_MAX=${formData.maxRange}\nENABLE_IMAGE_GEN=${formData.enableImage}\nENABLE_VISION=${formData.enableVision}\nENABLE_TTS=${formData.enableTTS}`;
+      const finalApiKey = useBYOP ? (injectedKey || '') : '';
+      if (useBYOP) updateLog('SECURITY: API_KEY_INJECTED_SUCCESSFULLY');
+
+      const envContent = `# CREDENTIALS\nBOT_TOKEN=\nPOLLINATIONS_KEY=${finalApiKey}\nOWNER_ID=\nSERVER_ID=\n\n# IDENTITY\nBOT_NAME="${formData.botName}"\nSYSTEM_PROMPT="${finalSysPrompt}"\nBACKSTORY="${finalBackstory}"\nHOBBIES="${formData.hobbies}"\nDISLIKES="${formData.dislikes}"\nLIKED_USERS="${formData.likedUsers}"\nCREATIVITY_LEVEL=0.75\nCASUAL_MODE=${formData.casualMode}\n\n# BEHAVIOR\nNATURAL_MIN=${formData.minRange}\nNATURAL_MAX=${formData.maxRange}\nENABLE_IMAGE_GEN=${formData.enableImage}\nENABLE_VISION=${formData.enableVision}\nENABLE_TTS=${formData.enableTTS}`;
 
       const zip = new JSZip();
       zip.file("package.json", PACKAGE_JSON);
@@ -111,7 +145,6 @@ export default function BotForgeUltimate() {
   return (
     <div className="min-h-screen bg-[#030303] text-white p-4 md:p-8 font-sans relative overflow-hidden">
 
-      {/* --- PREMIUM BACKGROUND EFFECTS --- */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[150px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 blur-[150px] animate-pulse delay-1000" />
@@ -122,11 +155,9 @@ export default function BotForgeUltimate() {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
 
-        {/* --- LEFT PANEL --- */}
         <div className="lg:col-span-7 space-y-8">
 
           <header className="flex flex-wrap items-center gap-6">
-            {/* Logo & Title Group */}
             <div className="flex items-center gap-6">
               <div className="relative group">
                 <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 to-purple-600 blur-xl opacity-40 group-hover:opacity-70 transition-all duration-500" />
@@ -144,7 +175,6 @@ export default function BotForgeUltimate() {
               </div>
             </div>
 
-            {/* Purple Badge Group */}
             <div className="flex items-center">
               <div className="px-4 py-2 rounded-full bg-purple-600/10 border border-purple-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.15)] animate-pulse">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-purple-400 flex items-center gap-2">
@@ -155,7 +185,6 @@ export default function BotForgeUltimate() {
             </div>
           </header>
 
-          {/* IDENTITY SECTION */}
           <GlassPanel title="Identity Matrix" icon={<Fingerprint className="text-cyan-400" size={18}/>} color="border-cyan-500/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <PremiumInput label="Designation" ph="e.g. OMEGA-1" val={formData.botName} set={(v) => setFormData({...formData, botName: v})} />
@@ -175,7 +204,6 @@ export default function BotForgeUltimate() {
             </div>
           </GlassPanel>
 
-          {/* BEHAVIOR SECTION */}
           <GlassPanel title="Behavioral Logic" icon={<Target className="text-purple-400" size={18}/>} color="border-purple-500/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <PremiumInput label="Likes" ph="Data, Efficiency" val={formData.likes} set={(v) => setFormData({...formData, likes: v})} />
@@ -185,7 +213,6 @@ export default function BotForgeUltimate() {
             </div>
           </GlassPanel>
 
-          {/* CONFIG SECTION */}
           <GlassPanel title="Hardware Config" icon={<Cpu className="text-emerald-400" size={18}/>} color="border-emerald-500/30">
             <div className="mb-6 bg-white/[0.03] border border-white/5 rounded-2xl p-5 backdrop-blur-sm">
               <div className="flex justify-between items-center mb-4">
@@ -215,7 +242,7 @@ export default function BotForgeUltimate() {
             </div>
           </GlassPanel>
 
-          <button onClick={handleGenerate} disabled={loading} className="w-full relative group overflow-hidden rounded-2xl p-[1px] transition-all active:scale-[0.99]">
+          <button onClick={initiateBuildSequence} disabled={loading} className="w-full relative group overflow-hidden rounded-2xl p-[1px] transition-all active:scale-[0.99]">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-white to-purple-500 animate-shimmer" />
             <div className="relative bg-black h-full rounded-[15px] flex items-center justify-center py-6 group-hover:bg-transparent transition-all">
               <div className="flex items-center gap-3">
@@ -226,10 +253,7 @@ export default function BotForgeUltimate() {
           </button>
         </div>
 
-        {/* --- RIGHT PANEL --- */}
         <div className="lg:col-span-5 space-y-6">
-
-          {/* CONSOLE */}
           <div className="rounded-3xl bg-[#080808] border border-white/10 overflow-hidden shadow-2xl">
             <div className="h-10 bg-white/5 border-b border-white/5 flex items-center justify-between px-6">
               <div className="flex items-center gap-2 text-[9px] font-mono text-gray-500 uppercase tracking-widest">
@@ -251,84 +275,82 @@ export default function BotForgeUltimate() {
             {generated && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
 
-                {/* UPLINKS */}
                 <div className="p-6 rounded-3xl bg-zinc-900/50 border border-white/10 backdrop-blur-xl">
                   <h3 className="text-xs font-black uppercase tracking-widest text-white mb-5 flex items-center gap-2">
                     <LinkIcon size={14} className="text-purple-400"/> External Uplinks
                   </h3>
                   <div className="grid grid-cols-1 gap-3">
                     <ExternalLinkBtn label="Discord Bot Token" sub="Required for login" url="https://discord.com/developers/applications" btnText="OPEN PORTAL" />
-                    <ExternalLinkBtn label="Pollinations AI Key" sub="Required for generation" url="https://pollinations.ai" btnText="GET KEY" />
+                    {!injectedKey && (
+                      <ExternalLinkBtn 
+                        label="Pollinations AI Key" 
+                        sub="Required for generation" 
+                        url={`https://enter.pollinations.ai/authorize?redirect_url=${REDIRECT_URL}&app_key=${APP_KEY}`} 
+                        btnText="GET KEY" 
+                        highlight
+                      />
+                    )}
+                    {injectedKey && (
+                      <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl flex justify-between items-center">
+                         <div>
+                            <div className="text-[11px] font-bold text-cyan-400 uppercase">Uplink Active</div>
+                            <div className="text-[9px] text-zinc-500 font-mono">Key Injected: {injectedKey.slice(0, 8)}...</div>
+                         </div>
+                         <button onClick={() => handleGenerate(true)} className="text-[9px] font-black text-white bg-cyan-600 px-3 py-1.5 rounded-lg hover:bg-cyan-400 hover:text-black transition-all">REGENERATE ZIP</button>
+                      </div>
+                    )}
                     <ExternalLinkBtn label="Discord IDs Guide" sub="How to find Server/User IDs" url="https://support.discord.com/hc/en-us/articles/206346498" btnText="READ GUIDE" />
                   </div>
                 </div>
 
-                {/* --- THE REAL DEPLOYMENT MATRIX --- */}
                 <div className="p-6 rounded-3xl bg-black border border-white/10 space-y-6">
                   <h3 className="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
                     <Share2 size={16}/> Deployment Protocols
                   </h3>
 
-                  {/* OPTION 1: LOCAL */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-[10px] font-bold text-white uppercase tracking-tighter bg-white/5 p-2 rounded-lg">
                       <HardDrive size={14} className="text-emerald-400"/> Method A: Local Host (Testing)
                     </div>
                     <div className="pl-4 space-y-2">
-                      <Step 
-  n="1" 
-  t="Identity Mapping" 
-  d="Extract the archive. Open 'env.txt' and input your Core Credentials: Bot Token, Pollinations API Key, Server ID, and Owner ID. This is the heart of the bot's access." 
-/>
-
-<Step 
-  n="2" 
-  t="Environment Ignition" 
-  d="Locate 'INSTALL_AND_LAUNCH.txt' and rename it to 'launch.cmd'. Run it as Admin to auto-setup Node.js. Alternatively, manually install Node.js (v18+) from nodejs.org if you prefer total control." 
-/>
-
-<Step 
-  n="3" 
-  t="Core Execution" 
-  d="Run 'launch.cmd' to initiate the automated uplink. For manual starts, rename 'env.txt' to '.env', open your terminal in the folder, and execute 'npm install' followed by 'node index.js'." 
-/>
-
+                      <Step n="1" t="Identity Mapping" d="Extract the archive. Open 'env.txt' and input your Core Credentials. If you used BYOP, your Pollinations key is already there." />
+                      <Step n="2" t="Environment Ignition" d="Rename 'INSTALL_AND_LAUNCH.txt' to 'launch.cmd' and run it as Admin." />
+                      <Step n="3" t="Core Execution" d="The script handles node installation and environment setup automatically." />
                     </div>
                   </div>
 
                   <div className="h-[1px] bg-white/5 w-full" />
 
-                  {/* OPTION 2: VPS */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-[10px] font-bold text-white uppercase tracking-tighter bg-white/5 p-2 rounded-lg">
-                      <Server size={14} className="text-cyan-400"/> Method B: Dedicated VPS (24/7 Professional)
+                      <Server size={14} className="text-cyan-400"/> Method B: Dedicated VPS
                     </div>
                     <div className="pl-4 space-y-2">
-                      <Step n="1" t="Sourcing" d="Get a Linux VPS (Ubuntu 22.04+) from AWS, DigitalOcean or Linode." />
-                      <Step n="2" t="Secure Transfer" d="Use SFTP (FileZilla) to upload bot files to /home/bot-directory." />
-                      <Step n="3" t="Process Management" d="Install PM2: 'npm install pm2 -g'. Run 'pm2 start index.js' to keep bot alive forever." />
+                      <Step n="1" t="Sourcing" d="Get a Linux VPS (Ubuntu 22.04+) from AWS or DigitalOcean." />
+                      <Step n="2" t="Secure Transfer" d="Upload bot files. Use 'npm install' to fetch dependencies." />
+                      <Step n="3" t="Process Management" d="Use PM2 to keep the bot process alive 24/7." />
                     </div>
                   </div>
 
-                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-  <div className="flex items-center gap-2 text-[9px] font-black text-emerald-500 uppercase">
-    <ShieldCheck size={12}/> Useful Tip
-  </div>
-  <p className="text-[8px] text-emerald-600/70 mt-1 font-mono">
- For rapid deployment on local machines, the provided launcher script automates the entire environment sync. CRITICAL: You must rename INSTALL_AND_LAUNCH.txt to launch.cmd to enable execution. This script handles Node.js validation, dependency syncing, and auto-converts your env.txt to a live .env file. Administrator privileges are required solely for environment pathing and Node.js installation. The source is open—you can inspect the logic in any text editor before renaming.
-  </p>
-</div>
-
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-emerald-500 uppercase">
+                      <ShieldCheck size={12}/> {injectedKey ? "BYOP ACTIVE" : "Useful Tip"}
+                    </div>
+                    <p className="text-[8px] text-emerald-600/70 mt-1 font-mono">
+                      {injectedKey 
+                        ? "Detected Pollinations Session. The generated ZIP contains your private API key. Deployment is ready for immediate neural processing."
+                        : "For rapid deployment, the launcher script automates everything. You must rename INSTALL_AND_LAUNCH.txt to launch.cmd."}
+                    </p>
+                  </div>
 
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                     <div className="flex items-center gap-2 text-[9px] font-black text-red-400 uppercase">
                       <ShieldAlert size={12}/> Security Warning
                     </div>
-                    <p className="text-[8px] text-zinc-500 mt-1 font-mono"> Rename env.txt to .env if using external hosting or unsure about using the launcher script. NEVER share your .env file. If your token leaks, anyone can hijack your bot's neural core.</p>
+                    <p className="text-[8px] text-zinc-500 mt-1 font-mono"> Rename env.txt to .env for hosting. NEVER share your .env file or your ZIP if you used the Neural Uplink.</p>
                   </div>
                 </div>
 
-                {/* PREVIEW / BUILD ACTIONS */}
                 <div className="p-6 rounded-3xl bg-black border border-white/10 space-y-6">
                   <h3 className="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
                     <Share2 size={16}/> Build Actions
@@ -346,7 +368,60 @@ export default function BotForgeUltimate() {
         </div>
       </div>
 
-      {/* --- PREVIEW MODAL --- */}
+      <AnimatePresence>
+        {showBuildModal && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-lg bg-[#0a0a0c] border border-white/10 rounded-[40px] overflow-hidden shadow-[0_0_100px_rgba(6,182,212,0.15)] p-10 relative">
+              <div className="text-center space-y-4 mb-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[9px] font-black text-cyan-400 uppercase tracking-widest">
+                  <Zap size={12} className="animate-pulse"/> Build Initialization
+                </div>
+                <h2 className="text-4xl font-black italic tracking-tighter uppercase">Choose Your <span className="text-cyan-500">Method</span></h2>
+                <p className="text-zinc-500 text-xs font-mono">Select how the bot's neural core should be authenticated.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <button 
+                  onClick={() => handleGenerate(true)}
+                  className="group relative overflow-hidden rounded-2xl p-[1px] transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse" />
+                  <div className="relative bg-[#050505] p-6 rounded-[15px] flex items-center gap-6">
+                    <div className="h-12 w-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                      <ZapIcon size={24} />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-white font-black uppercase text-sm italic tracking-widest">Neural Uplink (Recommended)</div>
+                      <div className="text-[10px] text-zinc-500 font-mono mt-1">Automatically injects your Pollinations key into the ZIP. No setup required.</div>
+                    </div>
+                    <ChevronRight className="ml-auto text-cyan-500 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </button>
+
+                <button 
+                  onClick={() => handleGenerate(false)}
+                  className="group relative overflow-hidden rounded-2xl p-[1px] transition-all hover:scale-[1.02] active:scale-95 opacity-60 hover:opacity-100"
+                >
+                  <div className="absolute inset-0 bg-white/10" />
+                  <div className="relative bg-[#050505] p-6 rounded-[15px] flex items-center gap-6">
+                    <div className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500">
+                      <Terminal size={24} />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-zinc-300 font-black uppercase text-sm italic tracking-widest">Standard Build</div>
+                      <div className="text-[10px] text-zinc-600 font-mono mt-1">Generates a clean ZIP. You must manually add your key to env.txt.</div>
+                    </div>
+                    <ChevronRight className="ml-auto text-zinc-700" />
+                  </div>
+                </button>
+              </div>
+
+              <button onClick={() => setShowBuildModal(false)} className="mt-8 w-full text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors">Abort Sequence</button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showPreview && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
@@ -416,7 +491,6 @@ export default function BotForgeUltimate() {
   );
 }
 
-// --- SUBCOMPONENTS ---
 const GlassPanel = ({ title, icon, color, children }: { title: string, icon: any, color: string, children: any }) => (
   <section className={clsx("relative rounded-3xl bg-[#080808] border border-white/5 p-6 md:p-8 overflow-hidden group hover:border-white/10 transition-colors", color)}>
     <div className="flex items-center gap-3 mb-6 relative z-10">
@@ -437,13 +511,14 @@ const PremiumInput = ({ label, ph, val, set }: { label: string, ph: string, val:
   </div>
 );
 
-const ExternalLinkBtn = ({ label, sub, url, btnText }: { label: string, sub: string, url: string, btnText: string }) => (
-  <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5 group">
+const ExternalLinkBtn = ({ label, sub, url, btnText, highlight = false }: { label: string, sub: string, url: string, btnText: string, highlight?: boolean }) => (
+  <div className={clsx("flex justify-between items-center p-3 rounded-xl border group", highlight ? "bg-cyan-500/5 border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)]" : "bg-white/5 border-white/5")}>
     <div>
-      <div className="text-[11px] font-bold text-white group-hover:text-cyan-400 transition-colors uppercase">{label}</div>
+      <div className={clsx("text-[11px] font-bold group-hover:text-cyan-400 transition-colors uppercase", highlight ? "text-cyan-400" : "text-white")}>{label}</div>
       <div className="text-[9px] text-gray-500 font-mono">{sub}</div>
     </div>
-    <a href={url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[9px] font-black text-cyan-400 uppercase hover:bg-cyan-500 hover:text-black transition-all">
+    <a href={url} target="_blank" rel="noopener noreferrer" className={clsx("px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all", 
+      highlight ? "bg-cyan-500 text-black hover:bg-white animate-pulse" : "bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500 hover:text-black")}>
       {btnText}
     </a>
   </div>
@@ -472,3 +547,4 @@ const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
     </div>
   </div>
 );
+
