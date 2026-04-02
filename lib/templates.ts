@@ -129,7 +129,7 @@ client.on('messageCreate', async (message) => {
             const imgBuffer = await callPollinations(query, 'flux', true);
             return message.reply({ files: [new AttachmentBuilder(imgBuffer, { name: 'generated.png' })] });
         } else if (tokens < 30) {
-            selectedModel = 'qwen-character';
+            selectedModel = 'nova-fast';
         } else if (tokens > 100 || /analyze|complex|logic|research|think/i.test(prompt)) {
             selectedModel = 'openai';
         } else if (/code|script|function|python|js/i.test(prompt)) {
@@ -143,7 +143,7 @@ client.on('messageCreate', async (message) => {
         let response = await callPollinations(history, selectedModel);
 
         // 5. Post-Processing
-        if (selectedModel === 'qwen-character') {
+        if (selectedModel === 'nova-fast') {
             response = response.split('\\n')[0].replace(/[^\\x00-\\x7F]/g, "");
         }
 
