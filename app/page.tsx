@@ -92,7 +92,7 @@ export default function BotForgeUltimate() {
   const handleGenerate = async (useBYOP = false) => {
     setShowBuildModal(false);
     if (useBYOP && !injectedKey) {
-      const authUrl = `https://enter.pollinations.ai/authorize?redirect_url=${REDIRECT_URL}&app_key=${APP_KEY}`;
+      const authUrl = `https://enter.pollinations.ai/authorize?redirect_uri=${REDIRECT_URL}&client_id=${APP_KEY}`;
       window.location.href = authUrl;
       return;
     }
@@ -285,7 +285,7 @@ export default function BotForgeUltimate() {
                       <ExternalLinkBtn 
                         label="Pollinations AI Key" 
                         sub="Required for generation" 
-                        url={`https://enter.pollinations.ai/authorize?redirect_url=${REDIRECT_URL}&app_key=${APP_KEY}`} 
+                        url={`https://enter.pollinations.ai/authorize?redirect_uri=${REDIRECT_URL}&client_id=${APP_KEY}`} 
                         btnText="GET KEY" 
                         highlight
                       />
@@ -547,4 +547,5 @@ const Step = ({ n, t, d }: { n: string, t: string, d: string }) => (
     </div>
   </div>
 );
+
 
